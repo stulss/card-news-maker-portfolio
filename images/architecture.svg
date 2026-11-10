@@ -1,0 +1,442 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 920" width="1400" height="920">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0e17" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#070a10" />
+    </linearGradient>
+
+    <!-- Card Backgrounds -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#182235" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#111827" stop-opacity="0.98" />
+    </linearGradient>
+
+    <linearGradient id="innerCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1f293d" />
+      <stop offset="100%" stop-color="#131c2e" />
+    </linearGradient>
+
+    <!-- Accent Gradients -->
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+
+    <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="100%" stop-color="#f43f5e" />
+    </linearGradient>
+
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <!-- Drop Shadows -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <style>
+    .title-kr { font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif; font-weight: 800; }
+    .subtitle-kr { font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif; font-weight: 500; }
+    .tag-en { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 700; letter-spacing: 0.5px; }
+    .card-title { font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif; font-weight: 700; font-size: 12.5px; }
+    .card-desc { font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif; font-weight: 400; font-size: 11px; fill: #94a3b8; }
+    .layer-badge { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; }
+  </style>
+
+  <!-- Background Base -->
+  <rect width="1400" height="920" rx="16" fill="url(#bgGrad)" stroke="#1e293b" stroke-width="2" />
+
+  <!-- Background Subtle Guides -->
+  <g stroke="rgba(255,255,255,0.025)" stroke-width="1">
+    <line x1="50" y1="130" x2="1350" y2="130" />
+    <line x1="50" y1="270" x2="1350" y2="270" />
+    <line x1="50" y1="465" x2="1350" y2="465" />
+    <line x1="50" y1="720" x2="1350" y2="720" />
+  </g>
+
+  <!-- ==================== HEADER SECTION ==================== -->
+  <g transform="translate(60, 36)">
+    <!-- Top Chips -->
+    <rect x="0" y="0" width="160" height="24" rx="12" fill="#312e81" stroke="#6366f1" stroke-width="1" />
+    <text x="80" y="16" fill="#c7d2fe" class="layer-badge" text-anchor="middle">SYSTEM ARCHITECTURE</text>
+
+    <!-- Main Title -->
+    <text x="0" y="54" fill="#f8fafc" class="title-kr" font-size="24">카드툰(Card News Maker) 전계층 클라이언트 완결 아키텍처</text>
+    <text x="0" y="74" fill="#94a3b8" class="subtitle-kr" font-size="13">단방향 불변 상태(Zustand) · 2D 캔버스(Konva) · 온디바이스 AI(WASM ONNX) · 무결성 내보내기 랑데부 게이트</text>
+
+    <!-- Key Principle Badges on Right -->
+    <g transform="translate(770, 8)">
+      <rect x="0" y="0" width="165" height="28" rx="6" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1" />
+      <text x="82" y="18" fill="#34d399" class="tag-en" font-size="11" text-anchor="middle">🔒 Zero Server Storage</text>
+
+      <rect x="175" y="0" width="165" height="28" rx="6" fill="rgba(99, 102, 241, 0.12)" stroke="#6366f1" stroke-width="1" />
+      <text x="257" y="18" fill="#818cf8" class="tag-en" font-size="11" text-anchor="middle">⚡ 100% Client-Side AI</text>
+
+      <rect x="350" y="0" width="160" height="28" rx="6" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" stroke-width="1" />
+      <text x="430" y="18" fill="#fbbf24" class="tag-en" font-size="11" text-anchor="middle">💾 IndexedDB Blob Cache</text>
+    </g>
+  </g>
+
+  <!-- ==================== LAYER 1: PRESENTATION & INTERACTION ==================== -->
+  <g transform="translate(60, 136)" filter="url(#shadow)">
+    <!-- Main Card Body -->
+    <rect width="1280" height="114" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.2" />
+    <rect x="0" y="0" width="5" height="114" rx="2.5" fill="url(#blueGrad)" />
+
+    <!-- Layer Header -->
+    <g transform="translate(24, 16)">
+      <rect x="0" y="0" width="68" height="20" rx="4" fill="#1e3a8a" />
+      <text x="34" y="14" fill="#bfdbfe" class="layer-badge" text-anchor="middle">LAYER 1</text>
+      <text x="80" y="15" fill="#f1f5f9" class="title-kr" font-size="14">UI &amp; Presentation Tier</text>
+      <circle cx="256" cy="11" r="2.5" fill="#64748b" />
+      <text x="270" y="15" fill="#94a3b8" class="card-desc">React 19 컴포넌트 · 8대 도구 레일 · 단축키 인터셉터 · 터치/마우스 Pointer Events 단일화</text>
+    </g>
+
+    <!-- 4 Sub Modules -->
+    <g transform="translate(24, 46)">
+      <!-- Item 1 -->
+      <g transform="translate(0, 0)">
+        <rect width="295" height="52" rx="8" fill="url(#innerCardGrad)" stroke="#334155" stroke-width="1" />
+        <rect x="12" y="12" width="28" height="28" rx="6" fill="#1e293b" />
+        <text x="26" y="31" font-size="14" text-anchor="middle">🎨</text>
+        <text x="48" y="24" fill="#e2e8f0" class="card-title">도구 레일 (8대 모듈 서랍)</text>
+        <text x="48" y="40" class="card-desc">템플릿 / 텍스트 / 스티커 / AI / 요소 / 설정</text>
+      </g>
+
+      <!-- Item 2 -->
+      <g transform="translate(310, 0)">
+        <rect width="295" height="52" rx="8" fill="url(#innerCardGrad)" stroke="#334155" stroke-width="1" />
+        <rect x="12" y="12" width="28" height="28" rx="6" fill="#1e293b" />
+        <text x="26" y="31" font-size="14" text-anchor="middle">⌨️</text>
+        <text x="48" y="24" fill="#e2e8f0" class="card-title">명령 팔레트 &amp; 단축키 시스템</text>
+        <text x="48" y="40" class="card-desc">Ctrl+K 명령창 · Ctrl+Z 스냅샷 · Shift+R 룰러</text>
+      </g>
+
+      <!-- Item 3 -->
+      <g transform="translate(620, 0)">
+        <rect width="295" height="52" rx="8" fill="url(#innerCardGrad)" stroke="#334155" stroke-width="1" />
+        <rect x="12" y="12" width="28" height="28" rx="6" fill="#1e293b" />
+        <text x="26" y="31" font-size="14" text-anchor="middle">👆</text>
+        <text x="48" y="24" fill="#e2e8f0" class="card-title">Pointer Events 통합 제어</text>
+        <text x="48" y="40" class="card-desc">데스크톱 마우스 + 모바일 터치 드래그 일원화</text>
+      </g>
+
+      <!-- Item 4 -->
+      <g transform="translate(930, 0)">
+        <rect width="300" height="52" rx="8" fill="url(#innerCardGrad)" stroke="#334155" stroke-width="1" />
+        <rect x="12" y="12" width="28" height="28" rx="6" fill="#1e293b" />
+        <text x="26" y="31" font-size="14" text-anchor="middle">🎛️</text>
+        <text x="48" y="24" fill="#e2e8f0" class="card-title">반응형 속성 인스펙터 패널</text>
+        <text x="48" y="40" class="card-desc">선택 레이어 자동 감지 · 실시간 스타일 바인딩</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- FLOW ARROW 1 -> 2 -->
+  <g transform="translate(700, 252)">
+    <line x1="0" y1="0" x2="0" y2="26" stroke="#6366f1" stroke-width="2" stroke-dasharray="4 3" />
+    <polygon points="-4,22 0,28 4,22" fill="#6366f1" />
+    <rect x="-90" y="5" width="180" height="18" rx="9" fill="#090d16" stroke="#6366f1" stroke-width="0.8" />
+    <text x="0" y="18" fill="#a5b4fc" class="tag-en" font-size="9.5" text-anchor="middle">Action Dispatch (Unidirectional)</text>
+  </g>
+
+  <!-- ==================== LAYER 2: STATE & PERSISTENCE ==================== -->
+  <g transform="translate(60, 282)" filter="url(#shadow)">
+    <!-- Container -->
+    <rect width="1280" height="162" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.2" />
+    <rect x="0" y="0" width="5" height="162" rx="2.5" fill="url(#purpleGrad)" />
+
+    <!-- Layer Header -->
+    <g transform="translate(24, 16)">
+      <rect x="0" y="0" width="68" height="20" rx="4" fill="#4c1d95" />
+      <text x="34" y="14" fill="#e9d5ff" class="layer-badge" text-anchor="middle">LAYER 2</text>
+      <text x="80" y="15" fill="#f1f5f9" class="title-kr" font-size="14">State &amp; Persistence Tier</text>
+      <circle cx="260" cy="11" r="2.5" fill="#64748b" />
+      <text x="274" y="15" fill="#94a3b8" class="card-desc">단일 진실 공급원(SSOT) · 불변 스냅샷 히스토리 · 런타임 Zod 방어 · IndexedDB Blob 캐시</text>
+    </g>
+
+    <!-- 2 Sub-Sections (State Store Left, Storage Right) -->
+    <g transform="translate(24, 46)">
+      <!-- Box 2-A: State Engine -->
+      <g transform="translate(0, 0)">
+        <rect width="840" height="100" rx="8" fill="url(#innerCardGrad)" stroke="#3b4252" stroke-width="1" />
+        <text x="16" y="22" fill="#c084fc" class="card-title">🧠 Deck &amp; Slide 불변 상태 스토어 (State Management)</text>
+
+        <!-- Sub 3 items -->
+        <g transform="translate(16, 32)">
+          <!-- Item 1 -->
+          <g transform="translate(0, 0)">
+            <rect width="255" height="56" rx="6" fill="#0f172a" stroke="#334155" />
+            <text x="12" y="20" fill="#e2e8f0" class="card-title" font-size="12">Deck Model &amp; Aspect Ratios</text>
+            <text x="12" y="35" class="card-desc">최대 10슬라이드 · 4:5 / 1:1 / 9:16 비율</text>
+            <text x="12" y="48" class="card-desc" fill="#818cf8">런타임 Zod 스키마 100% 무결성 검증</text>
+          </g>
+
+          <!-- Item 2 -->
+          <g transform="translate(268, 0)">
+            <rect width="265" height="56" rx="6" fill="#0f172a" stroke="#334155" />
+            <text x="12" y="20" fill="#e2e8f0" class="card-title" font-size="12">Snapshot History Stack</text>
+            <text x="12" y="35" class="card-desc">Ctrl+Z / Ctrl+Y 무한 되돌리기</text>
+            <text x="12" y="48" class="card-desc" fill="#a78bfa">슬라이더 연속 조작 디바운스 병합 최적화</text>
+          </g>
+
+          <!-- Item 3 -->
+          <g transform="translate(545, 0)">
+            <rect width="263" height="56" rx="6" fill="#0f172a" stroke="#334155" />
+            <text x="12" y="20" fill="#e2e8f0" class="card-title" font-size="12">Smart Magnetic Guides</text>
+            <text x="12" y="35" class="card-desc">5px 자석 흡착 스냅 가이드라인 계산기</text>
+            <text x="12" y="48" class="card-desc" fill="#38bdf8">화면 중심/오브젝트 간격 실시간 측정</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- Box 2-B: Storage Persistence Tier -->
+      <g transform="translate(855, 0)">
+        <rect width="375" height="100" rx="8" fill="url(#innerCardGrad)" stroke="#3b4252" stroke-width="1" />
+        <text x="16" y="22" fill="#fbbf24" class="card-title">💾 브라우저 로컬 스토리지 (Storage)</text>
+
+        <g transform="translate(16, 32)">
+          <!-- Item 1: IndexedDB -->
+          <g transform="translate(0, 0)">
+            <rect width="168" height="56" rx="6" fill="#1c1917" stroke="#78350f" />
+            <text x="12" y="20" fill="#fde68a" class="card-title" font-size="11.5">IndexedDB Store</text>
+            <text x="12" y="35" class="card-desc" fill="#cbd5e1">대용량 고해상도 Blob</text>
+            <text x="12" y="48" class="card-desc" fill="#f59e0b">새로고침 시 영속 보존</text>
+          </g>
+
+          <!-- Item 2: LocalStorage -->
+          <g transform="translate(175, 0)">
+            <rect width="168" height="56" rx="6" fill="#1e1b4b" stroke="#312e81" />
+            <text x="12" y="20" fill="#c7d2fe" class="card-title" font-size="11.5">localStorage Cache</text>
+            <text x="12" y="35" class="card-desc" fill="#cbd5e1">사용자 UI 테마/설정</text>
+            <text x="12" y="48" class="card-desc" fill="#818cf8">최근 템플릿 JSON 메타</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- FLOW ARROW 2 -> 3 -->
+  <g transform="translate(420, 446)">
+    <line x1="0" y1="0" x2="0" y2="26" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4 3" />
+    <polygon points="-4,22 0,28 4,22" fill="#38bdf8" />
+    <rect x="-70" y="5" width="140" height="18" rx="9" fill="#090d16" stroke="#38bdf8" stroke-width="0.8" />
+    <text x="0" y="18" fill="#7dd3fc" class="tag-en" font-size="9.5" text-anchor="middle">Scene Graph Push</text>
+  </g>
+
+  <g transform="translate(1040, 446)">
+    <line x1="0" y1="0" x2="0" y2="26" stroke="#f472b6" stroke-width="2" stroke-dasharray="4 3" />
+    <polygon points="-4,22 0,28 4,22" fill="#f472b6" />
+    <rect x="-75" y="5" width="150" height="18" rx="9" fill="#090d16" stroke="#f472b6" stroke-width="0.8" />
+    <text x="0" y="18" fill="#f9a8d4" class="tag-en" font-size="9.5" text-anchor="middle">Image Tensor Dispatch</text>
+  </g>
+
+  <!-- ==================== LAYER 3: DUAL COMPUTE & RENDERING ENGINES ==================== -->
+  <g transform="translate(60, 474)">
+    <!-- 3-A: React-Konva Graphics Engine (Left 61%) -->
+    <g transform="translate(0, 0)" filter="url(#shadow)">
+      <rect width="785" height="232" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.2" />
+      <rect x="0" y="0" width="5" height="232" rx="2.5" fill="url(#cyanGrad)" />
+
+      <!-- Header -->
+      <g transform="translate(24, 16)">
+        <rect x="0" y="0" width="80" height="20" rx="4" fill="#0c4a6e" />
+        <text x="40" y="14" fill="#bae6fd" class="layer-badge" text-anchor="middle">LAYER 3-A</text>
+        <text x="92" y="15" fill="#f1f5f9" class="title-kr" font-size="14">React-Konva 2D Graphic Engine</text>
+        <circle cx="320" cy="11" r="2.5" fill="#38bdf8" />
+        <text x="332" y="15" fill="#38bdf8" class="card-desc" font-weight="600">⚡ document.fonts.load() 동기화 게이트</text>
+      </g>
+
+      <!-- 6 Graphic Modules Grid -->
+      <g transform="translate(24, 46)">
+        <!-- Module 1: Typography -->
+        <g transform="translate(0, 0)">
+          <rect width="236" height="76" rx="8" fill="url(#innerCardGrad)" stroke="#334155" />
+          <text x="14" y="20" fill="#e2e8f0" class="card-title">🔤 텍스트 &amp; 곡선 타이포</text>
+          <text x="14" y="35" class="card-desc">자체호스팅 한글 폰트 10종</text>
+          <text x="14" y="49" class="card-desc">Arc 원형/물결 곡선 텍스트 수학식</text>
+          <text x="14" y="63" class="card-desc" fill="#38bdf8">말풍선 꼬리 위치 동적 바인딩</text>
+        </g>
+
+        <!-- Module 2: Image & Filters -->
+        <g transform="translate(248, 0)">
+          <rect width="236" height="76" rx="8" fill="url(#innerCardGrad)" stroke="#334155" />
+          <text x="14" y="20" fill="#e2e8f0" class="card-title">🖼️ 이미지 필터 &amp; 마스크</text>
+          <text x="14" y="35" class="card-desc">18종 WebGL 셰이더 튜닝</text>
+          <text x="14" y="49" class="card-desc">도형 클리핑 마스크 자르기</text>
+          <text x="14" y="63" class="card-desc" fill="#38bdf8">종횡비(Aspect) 자동 보정 노드</text>
+        </g>
+
+        <!-- Module 3: Vector & Shapes -->
+        <g transform="translate(496, 0)">
+          <rect width="241" height="76" rx="8" fill="url(#innerCardGrad)" stroke="#334155" />
+          <text x="14" y="20" fill="#e2e8f0" class="card-title">📐 벡터 도형 &amp; 블렌드 모드</text>
+          <text x="14" y="35" class="card-desc">5대 혼합모드 (Multiply/Screen 등)</text>
+          <text x="14" y="49" class="card-desc">다각형/별/화살표 정규화 변환</text>
+          <text x="14" y="63" class="card-desc" fill="#38bdf8">중심점 기준 오차 방지 어댑터</text>
+        </g>
+
+        <!-- Module 4: Dynamic Chart -->
+        <g transform="translate(0, 86)">
+          <rect width="236" height="76" rx="8" fill="url(#innerCardGrad)" stroke="#334155" />
+          <text x="14" y="20" fill="#e2e8f0" class="card-title">📊 실시간 인포그래픽 차트</text>
+          <text x="14" y="35" class="card-desc">도넛 / 원형 파이 / 막대 차트</text>
+          <text x="14" y="49" class="card-desc">데이터 입력 즉시 Konva Path 생성</text>
+          <text x="14" y="63" class="card-desc" fill="#38bdf8">브랜드 컬러셋 팔레트 연동</text>
+        </g>
+
+        <!-- Module 5: QR Generator -->
+        <g transform="translate(248, 86)">
+          <rect width="236" height="76" rx="8" fill="url(#innerCardGrad)" stroke="#334155" />
+          <text x="14" y="20" fill="#e2e8f0" class="card-title">📱 실시간 벡터 QR 코드</text>
+          <text x="14" y="35" class="card-desc">클라이언트 순수 QR 매트릭스 계산</text>
+          <text x="14" y="49" class="card-desc">색상/배경 투명화 및 로고 삽입</text>
+          <text x="14" y="63" class="card-desc" fill="#38bdf8">인쇄 품질 고밀도 해상도 렌더링</text>
+        </g>
+
+        <!-- Module 6: Transform Controller -->
+        <g transform="translate(496, 86)">
+          <rect width="241" height="76" rx="8" fill="url(#innerCardGrad)" stroke="#334155" />
+          <text x="14" y="20" fill="#e2e8f0" class="card-title">🧲 트랜스포머 &amp; 자석 스냅</text>
+          <text x="14" y="35" class="card-desc">Konva.Transformer 커스텀 앵커</text>
+          <text x="14" y="49" class="card-desc">회전각 15도 스냅 및 크기 제어</text>
+          <text x="14" y="63" class="card-desc" fill="#38bdf8">레이어 잠금/숨김 인라인 컨트롤</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- 3-B: On-Device AI Vision Engine (Right 37%) -->
+    <g transform="translate(805, 0)" filter="url(#shadow)">
+      <rect width="475" height="232" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.2" />
+      <rect x="0" y="0" width="5" height="232" rx="2.5" fill="url(#pinkGrad)" />
+
+      <!-- Header -->
+      <g transform="translate(24, 16)">
+        <rect x="0" y="0" width="80" height="20" rx="4" fill="#831843" />
+        <text x="40" y="14" fill="#fbcfe8" class="layer-badge" text-anchor="middle">LAYER 3-B</text>
+        <text x="92" y="15" fill="#f1f5f9" class="title-kr" font-size="14">On-Device AI Vision Engine</text>
+        <circle cx="295" cy="11" r="2.5" fill="#f43f5e" />
+        <text x="306" y="15" fill="#f472b6" class="card-desc" font-weight="600">🔒 서버 전송 0건 · Web Worker</text>
+      </g>
+
+      <!-- AI Core Modules -->
+      <g transform="translate(24, 46)">
+        <!-- WASM Runtime Box -->
+        <rect width="427" height="46" rx="8" fill="#201226" stroke="#f43f5e" stroke-opacity="0.6" />
+        <text x="14" y="20" fill="#fecdd3" class="card-title">⚡ WASM ONNX Runtime (@huggingface/transformers)</text>
+        <text x="14" y="34" class="card-desc" fill="#fda4af">동적 코드 스플리팅 · 27MB 지연 로딩 · 메인 스레드 프리징 0ms</text>
+
+        <!-- Sub 2 Modules (Cleanly separated in individual transforms) -->
+        <g transform="translate(0, 56)">
+          <!-- Left AI Module: MODNet -->
+          <g transform="translate(0, 0)">
+            <rect width="208" height="106" rx="8" fill="url(#innerCardGrad)" stroke="#334155" />
+            <text x="14" y="22" fill="#f472b6" class="card-title">✂️ MODNet 정밀 누끼</text>
+            <text x="14" y="40" class="card-desc">1536px 초고해상도 배경 분리</text>
+            <text x="14" y="55" class="card-desc">인물 머리카락 알파 블렌딩</text>
+            <text x="14" y="70" class="card-desc">100% 로컬 GPU/WASM 추론</text>
+            <text x="14" y="86" class="card-desc" fill="#f43f5e">개인정보 유출 위험 0건</text>
+          </g>
+
+          <!-- Right AI Module: Depth & Sticker -->
+          <g transform="translate(219, 0)">
+            <rect width="208" height="106" rx="8" fill="url(#innerCardGrad)" stroke="#334155" />
+            <text x="14" y="22" fill="#f472b6" class="card-title">🪄 AI 심도 &amp; 스티커 합성</text>
+            <text x="14" y="40" class="card-desc">배경 심도 블러 (포토툰 효과)</text>
+            <text x="14" y="55" class="card-desc">화이트 외곽선 스티커 생성</text>
+            <text x="14" y="70" class="card-desc">Offscreen Canvas 비동기 렌더</text>
+            <text x="14" y="86" class="card-desc" fill="#a855f7">UI 렌더링 지연 0ms 보장</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- FLOW ARROW 3 -> 4 (RENDEZVOUS BARRIER) -->
+  <g transform="translate(700, 706)">
+    <line x1="0" y1="0" x2="0" y2="28" stroke="#10b981" stroke-width="2" stroke-dasharray="4 3" />
+    <polygon points="-4,24 0,30 4,24" fill="#10b981" />
+    <rect x="-140" y="6" width="280" height="20" rx="10" fill="#090d16" stroke="#10b981" stroke-width="1" />
+    <text x="0" y="20" fill="#6ee7b7" class="tag-en" font-size="10" font-weight="700" text-anchor="middle">⚡ isReady() 비동기 랑데부 게이트 (Async Barrier)</text>
+  </g>
+
+  <!-- ==================== LAYER 4: SYNCHRONIZED EXPORT PIPELINE ==================== -->
+  <g transform="translate(60, 736)" filter="url(#shadow)">
+    <!-- Main Card Body -->
+    <rect width="1280" height="142" rx="12" fill="url(#cardGrad)" stroke="#10b981" stroke-width="1.2" />
+    <rect x="0" y="0" width="5" height="142" rx="2.5" fill="url(#emeraldGrad)" />
+
+    <!-- Layer Header -->
+    <g transform="translate(24, 16)">
+      <rect x="0" y="0" width="68" height="20" rx="4" fill="#064e3b" />
+      <text x="34" y="14" fill="#a7f3d0" class="layer-badge" text-anchor="middle">LAYER 4</text>
+      <text x="80" y="15" fill="#f1f5f9" class="title-kr" font-size="14">Synchronized Export &amp; Packaging Pipeline</text>
+      <circle cx="390" cy="11" r="2.5" fill="#10b981" />
+      <text x="404" y="15" fill="#34d399" class="card-desc" font-weight="600">빈 캔버스 캡처 0% 보장 · 1:1 WYSIWYG 네이티브 렌더러 공유</text>
+    </g>
+
+    <!-- 4 Export Modules -->
+    <g transform="translate(24, 46)">
+      <!-- Item 1 -->
+      <g transform="translate(0, 0)">
+        <rect width="295" height="74" rx="8" fill="#052e16" stroke="#10b981" stroke-opacity="0.6" stroke-width="1" />
+        <rect x="12" y="14" width="28" height="28" rx="6" fill="#064e3b" />
+        <text x="26" y="33" font-size="14" text-anchor="middle">📦</text>
+        <text x="48" y="24" fill="#6ee7b7" class="card-title">10장 일괄 ZIP 압축 패키징</text>
+        <text x="48" y="42" class="card-desc" fill="#a7f3d0">JSZip 메모리 스트림 번들링</text>
+        <text x="48" y="58" class="card-desc" fill="#34d399">isReady() 순차 대기 후 랑데부 캡처</text>
+      </g>
+
+      <!-- Item 2 -->
+      <g transform="translate(310, 0)">
+        <rect width="295" height="74" rx="8" fill="url(#innerCardGrad)" stroke="#334155" stroke-width="1" />
+        <rect x="12" y="14" width="28" height="28" rx="6" fill="#1e293b" />
+        <text x="26" y="33" font-size="14" text-anchor="middle">🖼️</text>
+        <text x="48" y="24" fill="#e2e8f0" class="card-title">PNG / WebP / JPG 래스터</text>
+        <text x="48" y="42" class="card-desc">1x, 2x, 3x 고밀도 레티나 스케일링</text>
+        <text x="48" y="58" class="card-desc" fill="#94a3b8">무손실/손실 압축 품질 조절</text>
+      </g>
+
+      <!-- Item 3 -->
+      <g transform="translate(620, 0)">
+        <rect width="295" height="74" rx="8" fill="url(#innerCardGrad)" stroke="#334155" stroke-width="1" />
+        <rect x="12" y="14" width="28" height="28" rx="6" fill="#1e293b" />
+        <text x="26" y="33" font-size="14" text-anchor="middle">📐</text>
+        <text x="48" y="24" fill="#e2e8f0" class="card-title">순수 벡터 SVG XML 생성 빌더</text>
+        <text x="48" y="42" class="card-desc">인쇄용 무손실 확대 텍스트/도형 변환</text>
+        <text x="48" y="58" class="card-desc" fill="#94a3b8">Konva 노드 트리 to W3C SVG 직렬화</text>
+      </g>
+
+      <!-- Item 4 -->
+      <g transform="translate(930, 0)">
+        <rect width="300" height="74" rx="8" fill="url(#innerCardGrad)" stroke="#334155" stroke-width="1" />
+        <rect x="12" y="14" width="28" height="28" rx="6" fill="#1e293b" />
+        <text x="26" y="33" font-size="14" text-anchor="middle">©️</text>
+        <text x="48" y="24" fill="#e2e8f0" class="card-title">워터마크 &amp; 슬라이드 페이지 인덱서</text>
+        <text x="48" y="42" class="card-desc">브랜드 로고 / 텍스트 투명도 자동 합성</text>
+        <text x="48" y="58" class="card-desc" fill="#94a3b8">'1/5', '2/5' 인스타그램 피드 인덱스 표기</text>
+      </g>
+    </g>
+  </g>
+</svg>

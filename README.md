@@ -9,10 +9,14 @@
 ```
 card-news-maker-portfolio/
 ├── index.html                   ⭐ 모던 인터랙티브 웹 포트폴리오 (더블클릭 실행 가능)
+├── portfolio-detail.html        📄 엔지니어링 상세 분석 심층 페이지
+├── resume-summary.html          📑 이력서 제출용 1페이지 핵심 경험 요약본
 ├── 포트폴리오_실행하기.bat          원클릭 브라우저 실행 스크립트
-├── 포트폴리오_요약_문서.md          노션 / 원티드 / 서류 제출용 서술형 포트폴리오
+├── PORTFOLIO.md                 노션 / 원티드 / 서류 제출용 마크다운 포트폴리오
+├── 이력서_프로젝트_경험_요약.md      서류 전형 제출용 핵심 경험 요약 마크다운
 ├── package.json                 웹 서빙 및 배포용 설정
 ├── README.md                    포트폴리오 안내서
+├── images/                      2026 최신 운영 스크린샷 & 고해상도 아키텍처 SVG/PNG
 ├── assets/                      포트폴리오용 시각 에셋
 │   └── evidence/                개발요청서(PRD) 검증 캡처 15종
 └── docs/                        원본 산출물 및 증거 문서

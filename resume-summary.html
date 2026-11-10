@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>카드툰 이력서/경력기술서 요약본</title>
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <style>
+    :root[data-theme="dark"] {
+      --bg: #090d16;
+      --bg-surface: #111827;
+      --card-bg: rgba(21, 29, 48, 0.75);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --text-main: #f8fafc;
+      --text-sub: #cbd5e1;
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --secondary: #8b5cf6;
+      --header-bg: rgba(9, 13, 22, 0.88);
+      --ambient-opacity: 0.6;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #f8fafc;
+      --bg-surface: #ffffff;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --text-main: #0f172a;
+      --text-sub: #334155;
+      --text-muted: #64748b;
+      --primary: #4f46e5;
+      --secondary: #7c3aed;
+      --header-bg: rgba(255, 255, 255, 0.9);
+      --ambient-opacity: 0.25;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Pretendard", "Noto Sans KR", sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.8;
+      padding-bottom: 90px;
+      position: relative;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.1s ease-out;
+    }
+
+    #ambient-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      opacity: var(--ambient-opacity);
+    }
+
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--card-border);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .top-bar a.back-btn {
+      color: var(--text-sub);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.96rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .top-bar a.back-btn:hover {
+      color: var(--primary);
+      transform: translateX(-3px);
+    }
+
+    .top-bar-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn-icon {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.05rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.25s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-outline {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .btn-copy {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      font-size: 0.86rem;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-copy:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .doc-layout {
+      max-width: 960px;
+      margin: 40px auto 0;
+      padding: 0 28px;
+      position: relative;
+      z-index: 1;
+      animation: docFadeIn 0.5s ease;
+    }
+
+    @keyframes docFadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .doc-header {
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 26px;
+      margin-bottom: 38px;
+    }
+
+    .doc-header h1 {
+      font-size: 2.6rem;
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .doc-header p.lead {
+      font-size: 1.15rem;
+      color: var(--text-sub);
+      line-height: 1.75;
+    }
+
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 32px;
+      margin-bottom: 36px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .section-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .section-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 14px;
+    }
+
+    .section-card-header h2 {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 22px 0 12px;
+    }
+
+    p { margin-bottom: 14px; color: var(--text-sub); font-size: 1rem; }
+    ul { margin: 0 0 20px 22px; color: var(--text-sub); font-size: 1rem; }
+    li { margin-bottom: 10px; }
+
+    .star-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 22px 24px;
+      margin-bottom: 20px;
+      transition: border-color 0.25s;
+    }
+
+    .star-item:hover {
+      border-color: var(--primary);
+    }
+
+    .star-item h4 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+
+    .star-item p {
+      font-size: 0.96rem;
+      margin-bottom: 8px;
+      line-height: 1.7;
+    }
+
+    .star-item strong.label {
+      display: inline-block;
+      width: 48px;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 34px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 12px 28px;
+      border-radius: 9999px;
+      font-size: 0.94rem;
+      font-weight: 800;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 9999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .floating-nav {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 90;
+    }
+
+    .quick-jump-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(12px);
+      transition: all 0.25s ease;
+      font-size: 1.1rem;
+    }
+
+    .quick-jump-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-3px);
+    }
+
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .top-bar, .btn-copy, .toast, #ambient-canvas, #progress-bar, .floating-nav { display: none !important; }
+      .section-card, .star-item {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        color: #000 !important;
+        box-shadow: none !important;
+      }
+      h1, h2, h3, h4, p, li, strong { color: #000 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="progress-bar"></div>
+  <canvas id="ambient-canvas"></canvas>
+
+  <div class="top-bar">
+    <a href="index.html" class="back-btn">
+      ← 메인 포트폴리오로 돌아가기
+    </a>
+    <div class="top-bar-actions">
+      <button id="theme-toggle" class="btn-icon" title="테마 전환" aria-label="테마 전환">☀</button>
+      <button class="btn btn-outline" onclick="window.print()">🖨️ 인쇄 / PDF 저장</button>
+      <a href="portfolio-detail.html" class="btn btn-outline">📄 상세 문서 (PORTFOLIO)</a>
+      <a href="https://card-news-maker-beige.vercel.app/" target="_blank" class="btn btn-primary">라이브 데모 ↗</a>
+    </div>
+  </div>
+
+  <div class="doc-layout">
+    <div class="doc-header">
+      <h1>💼 이력서 / 경력기술서 작성용 요약본</h1>
+      <p class="lead">
+        입사 지원 서류 및 채용 플랫폼(원티드, 잡코리아, 사람인, 리멤버 등)에 바로 복사하여 사용할 수 있도록 3가지 버전으로 정리했습니다.
+      </p>
+    </div>
+
+    <!-- Version A -->
+    <div class="section-card" id="ver-a">
+      <div class="section-card-header">
+        <h2>📌 [버전 A] 1줄 요약 / 짧은 개요형</h2>
+        <button class="btn-copy" onclick="copySection('ver-a-content')">📋 텍스트 복사</button>
+      </div>
+      <div id="ver-a-content">
+        <p><strong>• 프로젝트명:</strong> 카드툰 (브라우저 온디바이스 카드뉴스 &amp; 포토툰 편집기)</p>
+        <p><strong>• 개발 기간 / 규모:</strong> 2026.10 ~ 2026.11 (개인 프로젝트 / 기여도 100%)</p>
+        <p><strong>• 배포 링크:</strong> https://card-news-maker-beige.vercel.app/</p>
+        <p><strong>• 핵심 기술:</strong> React 19, TypeScript, Konva.js, Vite, WebAssembly (ONNX/MODNet), IndexedDB, Playwright, Vitest</p>
+        <p><strong>• 한 줄 요약:</strong> 서버 통신 0건의 프라이버시를 보장하며, WebAssembly 기반 온디바이스 AI 누끼 제거 및 인스타그램 10장 캐러셀 덱 일괄 편집/ZIP 출력을 지원하는 2D 캔버스 그래픽 웹 에디터</p>
+      </div>
+    </div>
+
+    <!-- Version B -->
+    <div class="section-card" id="ver-b">
+      <div class="section-card-header">
+        <h2>📌 [버전 B] 상세 경력기술서 양식 (STAR 기법 기반)</h2>
+        <button class="btn-copy" onclick="copySection('ver-b-content')">📋 텍스트 복사</button>
+      </div>
+      <div id="ver-b-content">
+        <h3>카드툰 (Card News Maker) | 프론트엔드 개발자</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">2026.10 ~ 2026.11 · 개인 프로젝트 (기여도 100%)</p>
+        
+        <p><strong>[프로젝트 소개]</strong><br>
+        서버 인프라 비용과 개인정보 유출 위험을 원천 차단하기 위해, 이미지 업로드·보정·AI 연산·내보내기까지 전 과정을 브라우저 단에서 100% 완결하는 고성능 카드뉴스·포토툰 그래픽 웹 편집 도구</p>
+
+        <p><strong>[담당 역할 및 주요 업무]</strong></p>
+        <ul>
+          <li>React 19 및 Konva.js 기반의 2D 캔버스 씬 그래프(Scene Graph) 렌더링 파이프라인 설계 및 구현</li>
+          <li>브라우저 온디바이스 AI(WebAssembly + MODNet) 통합을 통한 무서버 배경 제거(누끼 따기) 구현</li>
+          <li>불변 상태 기반 타임라인 Undo/Redo 엔진 및 디바운스 연속 액션 압축 로직 개발</li>
+          <li>대용량 미디어 영속화를 위한 IndexedDB 캐싱 아키텍처 및 10장 캐러셀 덱 ZIP 일괄 내보내기 구축</li>
+          <li>외부 네트워크 의존성 0건을 위한 자체 호스팅 폰트 도입 및 엄격한 CSP 보안 정책 수립</li>
+          <li>Oxlint, Vitest, Playwright E2E 테스트 및 GitHub Actions CI 빌드 자동화 구축</li>
+        </ul>
+
+        <p><strong>[핵심 문제 해결 및 성과 (STAR)]</strong></p>
+
+        <div class="star-item">
+          <h4>1. Canvas 웹폰트 비동기 동기화로 렌더링 폴백 결함 해결</h4>
+          <p><strong class="label">S/T:</strong> Canvas 엔진 특성상 브라우저에 선언된 웹폰트가 로드되기 전에 캔버스가 그려져 시스템 기본 폰트(Malgun Gothic)로 폴백되는 현상 발생.</p>
+          <p><strong class="label">A:</strong> 텍스트 레이어 생성 시 <code>document.fonts.load()</code>를 비동기 호출하고, 로드 완료 이벤트를 감지하여 Konva Stage를 정밀 리렌더링하는 동기화 훅 개발.</p>
+          <p><strong class="label">R:</strong> 폰트 유실률 0% 달성 및 10종의 한글 감성 폰트를 왜곡 없이 화면에 즉각 반영.</p>
+        </div>
+
+        <div class="star-item">
+          <h4>2. 불변 스냅샷 구조 확립으로 되돌리기(Undo) 객체 참조 오염 차단</h4>
+          <p><strong class="label">S/T:</strong> 레이어 순서 변경 후 실행 취소(Ctrl+Z) 시 과거 스냅샷 데이터까지 함께 변경되는 치명적 버그 발생.</p>
+          <p><strong class="label">A:</strong> 원인을 인플레이스 객체 변경(<code>zIndex</code> 직접 수정)으로 분석하고, 모든 레이어 조작 코드를 순수 함수 기반의 불변 복사(Immutable Update)로 전면 리팩토링.</p>
+          <p><strong class="label">R:</strong> 무제한 단계의 정확한 Undo/Redo 보장 및 상태 예측 가능성 대폭 향상.</p>
+        </div>
+
+        <div class="star-item">
+          <h4>3. isReady 프로미스 게이트를 통한 캐러셀 배치 캡처 누락 방지</h4>
+          <p><strong class="label">S/T:</strong> 최대 10장의 슬라이드를 순회하며 ZIP으로 일괄 압축할 때, 비동기 이미지 로딩 지연으로 일부 슬라이드가 빈 화면으로 캡처되는 결함 발생.</p>
+          <p><strong class="label">A:</strong> 캔버스 렌더러에 "이미지 로드 카운트 == 실제 노드 수"를 검증하는 <code>isReady</code> 프로미스 게이트를 구축하고, 내보내기 엔진이 이를 await 대기 후 캡처하도록 랑데부 동기화 적용.</p>
+          <p><strong class="label">R:</strong> 10장 연속 고해상도 ZIP 내보내기 시 캡처 누락 결함 0건 달성.</p>
+        </div>
+
+        <div class="star-item">
+          <h4>4. WebAssembly 온디바이스 AI 도입으로 서버 비용 0원 &amp; 완벽한 프라이버시 달성</h4>
+          <p><strong class="label">S/T:</strong> 이미지 배경 제거 기능을 위해 외부 유료 API를 사용할 경우 서버 비용과 이미지 전송에 따른 프라이버시 이슈 존재.</p>
+          <p><strong class="label">A:</strong> <code>@huggingface/transformers</code>와 MODNet 신경망을 동적 import로 구성하여 브라우저 로컬 WASM 환경에서 1536px 인물 사진 누끼 추출 구현.</p>
+          <p><strong class="label">R:</strong> 서버 운영비 0원 달성, 업로드 이미지 서버 전송 0건(완전한 클라이언트 격리) 실현.</p>
+        </div>
+
+        <div class="star-item">
+          <h4>5. 크로스 플랫폼 Pointer Events 통일로 모바일 터치 드래그 지원</h4>
+          <p><strong class="label">S/T:</strong> HTML5 표준 Drag &amp; Drop API가 모바일/태블릿 터치 환경에서 동작하지 않아 레이어 순서 변경 불가.</p>
+          <p><strong class="label">A:</strong> Pointer Events API(<code>setPointerCapture</code>, <code>elementFromPoint</code>)를 적용하고 CSS <code>touch-action: none</code>을 지정하여 마우스와 터치 제스처를 단일 핸들러로 통합.</p>
+          <p><strong class="label">R:</strong> 모바일, 태블릿, 데스크톱 모든 디바이스에서 부드러운 드래그앤드롭 정렬 지원.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Version C -->
+    <div class="section-card" id="ver-c">
+      <div class="section-card-header">
+        <h2>📌 [버전 C] 직무 역량 중심 핵심 키워드 불릿 포인트</h2>
+        <button class="btn-copy" onclick="copySection('ver-c-content')">📋 텍스트 복사</button>
+      </div>
+      <div id="ver-c-content">
+        <ul>
+          <li><strong>2D 캔버스 &amp; 그래픽스 프로그래밍:</strong> Konva.js를 활용한 다중 레이어, 곡선 텍스트(Arc text), 외곽선 스트로크, 5대 블렌드 모드, 마그네틱 스냅 가이드 구현 능력 보유</li>
+          <li><strong>브라우저 온디바이스 AI &amp; WASM:</strong> 서버리스 환경에서 WebAssembly 기반 머신러닝 모델(MODNet)을 브라우저 메모리에 탑재하고 동적 번들 분리를 통한 초기 로딩 최적화 역량</li>
+          <li><strong>고급 프론트엔드 상태 관리:</strong> 얕은 복사/깊은 복사 참조 무결성을 고려한 불변 스냅샷 타임라인(Undo/Redo) 설계 및 연속 입력 디바운스 병합 구현</li>
+          <li><strong>클라이언트 스토리지 아키텍처:</strong> localStorage의 5MB 쿼터 한계와 Blob URL 수명 주기 문제를 해결하기 위한 IndexedDB 기반 대용량 미디어 비동기 캐싱 및 세션 복원 파이프라인 구축</li>
+          <li><strong>보안 및 웹 표준 품질:</strong> 자체 호스팅 폰트 번들링으로 외부 트래킹 차단, 엄격한 Content Security Policy(CSP) 적용, Zod 기반 방어적 스키마 검증기 구현</li>
+          <li><strong>자동화된 테스트 및 배포 파이프라인:</strong> Oxlint, Vitest 단위 테스트, Playwright E2E 스모크 테스트, GitHub Actions CI를 결합한 무결점 릴리즈 프로세스 운영</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="floating-nav">
+    <button class="quick-jump-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="최상단으로 이동" aria-label="맨 위로">▲</button>
+  </div>
+
+  <div id="toast" class="toast">클립보드에 복사되었습니다!</div>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (window.scrollY / docHeight) * 100;
+      document.getElementById('progress-bar').style.width = `${progress}%`;
+    });
+
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeToggleBtn.innerText = currentTheme === 'dark' ? '☀' : '🌙';
+
+    themeToggleBtn.addEventListener('click', () => {
+      const activeTheme = document.documentElement.getAttribute('data-theme');
+      const nextTheme = activeTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      localStorage.setItem('theme', nextTheme);
+      themeToggleBtn.innerText = nextTheme === 'dark' ? '☀' : '🌙';
+    });
+
+    (function initAmbientCanvas() {
+      const canvas = document.getElementById('ambient-canvas');
+      const ctx = canvas.getContext('2d');
+      let w, h;
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      const orbs = [
+        { x: w * 0.2, y: h * 0.3, r: 350, vx: 0.2, vy: 0.3, color: 'rgba(99, 102, 241, 0.09)' },
+        { x: w * 0.8, y: h * 0.5, r: 380, vx: -0.2, vy: 0.2, color: 'rgba(139, 92, 246, 0.08)' }
+      ];
+
+      function animate() {
+        ctx.clearRect(0, 0, w, h);
+        orbs.forEach(orb => {
+          orb.x += orb.vx;
+          orb.y += orb.vy;
+          if (orb.x < -orb.r) orb.x = w + orb.r;
+          if (orb.x > w + orb.r) orb.x = -orb.r;
+          if (orb.y < -orb.r) orb.y = h + orb.r;
+          if (orb.y > h + orb.r) orb.y = -orb.r;
+
+          const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
+          grad.addColorStop(0, orb.color);
+          grad.addColorStop(1, 'transparent');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    function copySection(elementId) {
+      const el = document.getElementById(elementId);
+      const text = el.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

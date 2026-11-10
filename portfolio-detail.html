@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>카드툰 상세 포트폴리오 문서 (PORTFOLIO)</title>
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <style>
+    :root[data-theme="dark"] {
+      --bg: #090d16;
+      --bg-surface: #111827;
+      --card-bg: rgba(21, 29, 48, 0.75);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --text-main: #f8fafc;
+      --text-sub: #cbd5e1;
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --secondary: #8b5cf6;
+      --accent: #ec4899;
+      --table-header: rgba(16, 22, 38, 0.95);
+      --header-bg: rgba(9, 13, 22, 0.88);
+      --ambient-opacity: 0.6;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #f8fafc;
+      --bg-surface: #ffffff;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --text-main: #0f172a;
+      --text-sub: #334155;
+      --text-muted: #64748b;
+      --primary: #4f46e5;
+      --secondary: #7c3aed;
+      --accent: #db2777;
+      --table-header: #f1f5f9;
+      --header-bg: rgba(255, 255, 255, 0.9);
+      --ambient-opacity: 0.25;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Pretendard", "Noto Sans KR", sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.8;
+      padding-bottom: 90px;
+      position: relative;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.1s ease-out;
+    }
+
+    #ambient-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      opacity: var(--ambient-opacity);
+    }
+
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--card-border);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .top-bar a.back-btn {
+      color: var(--text-sub);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.96rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .top-bar a.back-btn:hover {
+      color: var(--primary);
+      transform: translateX(-3px);
+    }
+
+    .top-bar-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn-icon {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.05rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.25s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-outline {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .doc-layout {
+      max-width: 1080px;
+      margin: 40px auto 0;
+      padding: 0 28px;
+      position: relative;
+      z-index: 1;
+      animation: docFadeIn 0.5s ease;
+    }
+
+    @keyframes docFadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .doc-header {
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 32px;
+      margin-bottom: 40px;
+    }
+
+    .doc-header h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      margin-bottom: 14px;
+      color: var(--text-main);
+    }
+
+    .doc-header p.lead {
+      font-size: 1.2rem;
+      color: var(--text-sub);
+      line-height: 1.8;
+      word-break: keep-all;
+    }
+
+    h2 {
+      font-size: 1.85rem;
+      font-weight: 900;
+      margin: 56px 0 24px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+      letter-spacing: -0.015em;
+    }
+
+    h3 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin: 34px 0 14px;
+      color: var(--primary);
+    }
+
+    p { margin-bottom: 18px; color: var(--text-sub); font-size: 1.02rem; }
+    ul, ol { margin: 0 0 26px 24px; color: var(--text-sub); font-size: 1rem; }
+    li { margin-bottom: 10px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0 36px;
+      background: var(--card-bg);
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    th, td {
+      padding: 16px 20px;
+      text-align: left;
+      font-size: 0.96rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    th {
+      background: var(--table-header);
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    td { color: var(--text-sub); }
+
+    td img {
+      max-width: 240px;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+      display: block;
+      transition: transform 0.3s ease;
+      cursor: zoom-in;
+    }
+
+    td img:hover { transform: scale(1.05); }
+
+    .callout {
+      background: var(--card-bg);
+      border-left: 4px solid var(--primary);
+      padding: 22px 26px;
+      border-radius: 0 14px 14px 0;
+      margin: 30px 0;
+      border-top: 1px solid var(--card-border);
+      border-right: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .callout h4 {
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .callout p { color: var(--text-main); margin-bottom: 0; font-size: 1rem; }
+
+    .arch-preview {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+      margin: 26px 0 36px;
+      display: block;
+      cursor: zoom-in;
+      transition: transform 0.3s ease;
+    }
+
+    .arch-preview:hover { transform: scale(1.01); }
+
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.94);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .lightbox.active { display: flex; }
+
+    .lightbox-content {
+      max-width: 92vw;
+      max-height: 92vh;
+      border-radius: 12px;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+      animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 24px;
+      right: 32px;
+      color: #fff;
+      font-size: 2.4rem;
+      cursor: pointer;
+    }
+
+    .floating-nav {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 90;
+    }
+
+    .quick-jump-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(12px);
+      transition: all 0.25s ease;
+      font-size: 1.1rem;
+    }
+
+    .quick-jump-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-3px);
+    }
+
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .top-bar, .lightbox, #ambient-canvas, #progress-bar, .floating-nav { display: none !important; }
+      table, .callout { border-color: #ccc !important; background: #fff !important; color: #000 !important; }
+      th { background: #eee !important; color: #000 !important; }
+      td, p, li, h1, h2, h3, h4 { color: #000 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="progress-bar"></div>
+  <canvas id="ambient-canvas"></canvas>
+
+  <div class="top-bar">
+    <a href="index.html" class="back-btn">
+      ← 메인 포트폴리오로 돌아가기
+    </a>
+    <div class="top-bar-actions">
+      <button id="theme-toggle" class="btn-icon" title="테마 전환" aria-label="테마 전환">☀</button>
+      <button class="btn btn-outline" onclick="window.print()">🖨️ PDF 인쇄</button>
+      <a href="resume-summary.html" class="btn btn-outline">💼 이력서 요약본 보기</a>
+      <a href="https://card-news-maker-beige.vercel.app/" target="_blank" class="btn btn-primary">라이브 데모 ↗</a>
+    </div>
+  </div>
+
+  <div class="doc-layout">
+    <div class="doc-header">
+      <h1>🎨 카드툰 (Card News Maker) 프로젝트 상세 문서</h1>
+      <p class="lead">
+        서버 통신 0건의 프라이버시를 보장하며, 브라우저 단에서 WebAssembly AI 누끼 및 인스타그램 10장 캐러셀 덱 일괄 편집·ZIP 출력을 지원하는 2D 캔버스 그래픽 웹 에디터입니다.
+      </p>
+    </div>
+
+    <!-- Section 1 -->
+    <h2>1. 프로젝트 개요 &amp; 핵심 가치</h2>
+    <table>
+      <tr>
+        <th style="width: 25%;">항목</th>
+        <th>내용</th>
+      </tr>
+      <tr>
+        <td><strong>프로젝트명</strong></td>
+        <td>카드툰 (Card News Maker)</td>
+      </tr>
+      <tr>
+        <td><strong>형태</strong></td>
+        <td>단일 페이지 웹 애플리케이션 (SPA) / PWA 지원</td>
+      </tr>
+      <tr>
+        <td><strong>핵심 목표</strong></td>
+        <td>별도의 백엔드 서버 없이, 브라우저 단에서 고해상도 카드뉴스와 포토툰·밈을 전문 그래픽 툴처럼 빠르고 안전하게 제작·내보내기</td>
+      </tr>
+      <tr>
+        <td><strong>배포 주소</strong></td>
+        <td><a href="https://card-news-maker-beige.vercel.app/" target="_blank" style="color: var(--primary); font-weight: 700;">https://card-news-maker-beige.vercel.app/</a></td>
+      </tr>
+      <tr>
+        <td><strong>핵심 지표</strong></td>
+        <td>
+          • <strong>서버 전송 0건</strong>: 업로드 이미지 및 AI 연산 100% 클라이언트 로컬 처리<br>
+          • <strong>검증 템플릿 42종</strong>: 인스타그램 캐러셀, 공지, 밈 등 원클릭 프리셋<br>
+          • <strong>캐러셀 10장 덱 지원</strong>: 다중 슬라이드 편집 및 일괄 ZIP 다운로드<br>
+          • <strong>자체 호스팅 폰트 10종</strong>: Google Fonts 외부 요청을 제거하여 엄격한 CSP 및 제3자 트래킹 차단
+        </td>
+      </tr>
+    </table>
+
+    <!-- Section 2: Diverse Templates -->
+    <h2>2. 다양한 실전 템플릿 갤러리 (8종 실물 쇼케이스)</h2>
+    <p>
+      다양한 목적(정보 전달 캐러셀, 감성 인용구, 트렌드 뉴스, 커머스 할인 배너, 후기 포토툰, 프로필 소개, SNS 밈)에 맞춤 설계된 실제 완성 캔버스들입니다.
+    </p>
+
+    <table>
+      <tr>
+        <th style="width: 25%;">템플릿 구분</th>
+        <th style="width: 35%;">실제 캔버스 캡처</th>
+        <th>디자인 및 스타일링 특징</th>
+      </tr>
+      <tr>
+        <td><strong>캐러셀 6장 세트 (라이트)</strong></td>
+        <td><img src="images/tpl_01_carousel_light.png" alt="캐러셀 라이트" onclick="openLightbox(this.src)"></td>
+        <td>화사한 화이트/민트 톤과 가독성 높은 폰트 위주의 6장 정보성 덱</td>
+      </tr>
+      <tr>
+        <td><strong>캐러셀 5장 세트 (파스텔)</strong></td>
+        <td><img src="images/tpl_02_carousel_pastel.png" alt="캐러셀 파스텔" onclick="openLightbox(this.src)"></td>
+        <td>라벤더·코튼캔디 파스텔 컬러의 감성적인 라이프스타일 카드뉴스</td>
+      </tr>
+      <tr>
+        <td><strong>오로라 인용구</strong></td>
+        <td><img src="images/tpl_03_aurora_quote.png" alt="오로라 인용구" onclick="openLightbox(this.src)"></td>
+        <td>신비로운 오로라 그라디언트와 큰따옴표 타이포그래피 인스타 감성 컷</td>
+      </tr>
+      <tr>
+        <td><strong>글래스 트렌드 뉴스</strong></td>
+        <td><img src="images/tpl_04_glass_trend.png" alt="글래스 헤드라인" onclick="openLightbox(this.src)"></td>
+        <td>반투명 블러 유리 질감의 글래스모피즘 헤드라인 템플릿</td>
+      </tr>
+      <tr>
+        <td><strong>네온 SALE 프로모션</strong></td>
+        <td><img src="images/tpl_05_sale_banner.png" alt="SALE 배너" onclick="openLightbox(this.src)"></td>
+        <td>시선을 끄는 옐로우/네온 컬러의 할인 및 이벤트 커머스 배너</td>
+      </tr>
+      <tr>
+        <td><strong>후기 말풍선 (포토툰)</strong></td>
+        <td><img src="images/tpl_06_review_bubble.png" alt="후기 말풍선" onclick="openLightbox(this.src)"></td>
+        <td>별점 5개와 대사 말풍선으로 고객 반응을 전달하는 포토툰 레이아웃</td>
+      </tr>
+      <tr>
+        <td><strong>자기소개 프로필 카드</strong></td>
+        <td><img src="images/tpl_07_profile_intro.png" alt="자기소개 카드" onclick="openLightbox(this.src)"></td>
+        <td>실사 사진을 원형으로 마스킹 크롭하여 나를 브랜딩하는 포토툰 카드</td>
+      </tr>
+      <tr>
+        <td><strong>티어표 SNS 밈</strong></td>
+        <td><img src="images/tpl_08_meme_tier.png" alt="티어표 밈" onclick="openLightbox(this.src)"></td>
+        <td>S/A/B/C 등급별로 요소를 배치하여 참여와 댓글을 유도하는 밈 그리드</td>
+      </tr>
+    </table>
+
+    <!-- Section 3: Toon Reference -->
+    <h2>3. 포토툰(Photo-toon) 벤치마킹 및 특화 설계</h2>
+    <p>
+      Canva, 망고보드, 미리캔버스, 클립스튜디오 등 시장 레퍼런스를 정밀 분석하여 포토툰 제작에 최적화된 6대 설계를 적용했습니다.
+    </p>
+
+    <table>
+      <tr>
+        <th>포토툰 핵심 요소</th>
+        <th>레퍼런스 분석 (Canva/망고보드/클립스튜디오)</th>
+        <th>카드툰 (Card News Maker) 적용 구현</th>
+      </tr>
+      <tr>
+        <td><strong>화면 비율 규격</strong></td>
+        <td>모바일 피드 화면 점유율이 가장 높은 4:5(1080×1350)가 표준 대세</td>
+        <td><strong>4:5 인스타 피드 규격 기본 제공</strong> 및 1:1, 9:16 원클릭 전환</td>
+      </tr>
+      <tr>
+        <td><strong>말풍선 &amp; 시선 흐름</strong></td>
+        <td>한국어 독서 습관(좌→우, 상→하 Z패턴)과 복잡한 배경 분리를 위한 흰색 불투명 바탕+외곽선</td>
+        <td><strong>자막/말풍선 프리셋</strong>: 불투명 배경 + 테두리 스트로크 + 꼬리 위치 회전 지원</td>
+      </tr>
+      <tr>
+        <td><strong>인물 사진 누끼 합성</strong></td>
+        <td>실제 사진 인물/반려동물을 컷 만화 배경에 얹는 포토툰 필수 작업</td>
+        <td><strong>브라우저 온디바이스 AI(MODNet)</strong>: 서버 전송 없이 1536px 인물 배경 즉시 제거</td>
+      </tr>
+      <tr>
+        <td><strong>연속 스토리텔링</strong></td>
+        <td>표지(훅) → 2~8컷 본문 전개 → 엔딩(CTA/팔로우 유도) 캐러셀 구조</td>
+        <td><strong>10장 슬라이드 덱(Deck) 스트립</strong>: 슬라이드 추가/복제/순서 변경 및 일괄 ZIP 출력</td>
+      </tr>
+      <tr>
+        <td><strong>감정 효과 스티커</strong></td>
+        <td>대사 외의 감정 표현(ㅋㅋㅋ, 헐!, 느낌표, 반짝이, 땀방울, 당황선)</td>
+        <td><strong>24종 스티커 팩 &amp; 내 스티커 보관함</strong>: 도형+텍스트 그룹 스티커 원클릭 배치</td>
+      </tr>
+    </table>
+
+    <!-- Section 4: Architecture -->
+    <h2>4. 시스템 아키텍처 다이어그램 &amp; 계층별 설계 의도</h2>
+    <p>
+      UI 조작, 불변 상태 스토어, 캔버스 렌더러, 온디바이스 AI 엔진 및 비동기 내보내기 파이프라인의 유기적 단방향 데이터 흐름도입니다.
+    </p>
+
+    <div style="display: flex; gap: 10px; margin: 16px 0;">
+      <a href="images/architecture.svg" target="_blank" class="btn btn-outline" style="font-size: 0.9rem; padding: 8px 16px;">
+        🔍 원본 벡터(SVG) 열기
+      </a>
+      <a href="images/architecture.png" download="카드툰_시스템_아키텍처.png" class="btn btn-primary" style="font-size: 0.9rem; padding: 8px 16px;">
+        📥 고해상도 PNG 다운로드
+      </a>
+    </div>
+
+    <img src="images/architecture.png" alt="카드툰 시스템 아키텍처 다이어그램" class="arch-preview" onclick="openLightbox('images/architecture.png')">
+    <p style="text-align: center; font-size: 0.88rem; color: var(--text-muted); margin-top: -24px; margin-bottom: 30px;">
+      ▲ 클릭하시면 전체화면 고해상도 라이트박스로 세부 텍스트를 선명하게 확인하실 수 있습니다.
+    </p>
+
+    <h3>4 계층별 아키텍처 역할 및 핵심 엔지니어링 전략</h3>
+    <table>
+      <tr>
+        <th style="width: 18%;">계층 (Layer)</th>
+        <th style="width: 25%;">주요 모듈 및 기술</th>
+        <th>설계 의도 및 엔지니어링 성과</th>
+      </tr>
+      <tr>
+        <td><strong>Layer 1<br>UI &amp; Dispatch</strong></td>
+        <td>
+          <code>React 19</code><br>
+          도구 레일 8대 모듈<br>
+          Pointer Events 통합 제어<br>
+          단축키 인터셉터 (Ctrl+K/Z)
+        </td>
+        <td>
+          모바일 터치 환경과 데스크톱 마우스 입력을 Pointer Events로 단일화하여 장치 간 레이어 드래그 정렬 결함을 완전히 해소했습니다. 모든 UI 상호작용은 단방향 불변 액션으로 디스패치됩니다.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Layer 2<br>State &amp; Storage</strong></td>
+        <td>
+          <code>Zustand</code> 단일 진실 공급원<br>
+          순수 함수 불변 스냅샷 히스토리<br>
+          <code>Zod</code> 런타임 스키마 방어<br>
+          <code>IndexedDB</code> Blob 캐시
+        </td>
+        <td>
+          인플레이스 객체 변형을 제거하여 Undo/Redo 스냅샷 무결성을 100% 보장하고, 슬라이더 연속 조작을 500ms 단위로 병합했습니다. 5MB 용량 한계의 localStorage 대신 IndexedDB를 도입하여 수십 MB 대용량 고해상도 이미지 덱을 안정적으로 영속화했습니다.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Layer 3-A<br>Canvas 2D Engine</strong></td>
+        <td>
+          <code>React-Konva 10.3</code><br>
+          <code>document.fonts.load()</code> 동기화<br>
+          18종 WebGL 셰이더 필터<br>
+          5px 자석 스냅 가이드라인
+        </td>
+        <td>
+          DOM 방식의 Reflow 성능 저하를 방지하기 위해 가상 씬 그래프를 구축하고 60FPS 하드웨어 가속 렌더링을 구현했습니다. 브라우저 캔버스의 웹폰트 로딩 누락 결함을 <code>fontKey</code> 비동기 동기화 게이트로 해결했습니다.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Layer 3-B<br>On-Device AI Engine</strong></td>
+        <td>
+          <code>@huggingface/transformers</code><br>
+          <code>MODNet ONNX Runtime WASM</code><br>
+          Offscreen Web Worker 스레드<br>
+          동적 코드 분할 (27MB 분리)
+        </td>
+        <td>
+          서버 API 호출 비용(건당 10~50원)과 개인 사진 유출 위험을 0으로 차단한 100% 브라우저 로컬 AI 인물 배경 제거입니다. 메인 스레드 프리징을 방지하기 위해 Web Worker에서 구동되며, 초기 번들 최적화를 위해 동적 지연 로딩을 적용했습니다.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Layer 4<br>Synchronized Export</strong></td>
+        <td>
+          <code>isReady()</code> 랑데부 게이트<br>
+          <code>stage.toDataURL()</code><br>
+          <code>JSZip</code> 메모리 스트림 패키징<br>
+          SVG 순수 벡터 빌더
+        </td>
+        <td>
+          다중 슬라이드 일괄 캡처 시 비동기 이미지 로딩 지연으로 인해 발생하던 '빈 화면 저장' 레이스 컨디션을 <code>isReady()</code> 비동기 배리어로 원천 방지하여 결함률 0%를 달성했습니다.
+        </td>
+      </tr>
+    </table>
+
+    <div class="callout">
+      <h4>💡 단일 Stage 파이프라인 기반 WYSIWYG 보장</h4>
+      <p>
+        미리보기 화면과 실제 내보내기 결과물이 서로 다른 렌더러(예: Headless Puppeteer 또는 DOM-to-Canvas 라이브러리)를 사용할 때 발생하는 폰트 크기 및 레이어 위치 왜곡 문제를 근본적으로 해결하기 위해, 화면 표시용과 내보내기용이 동일한 Konva Native Stage 파이프라인을 100% 공유하도록 설계했습니다.
+      </p>
+    </div>
+
+    <!-- Section 5: Troubleshooting -->
+    <h2>5. 핵심 엔지니어링 문제 해결 (Troubleshooting 6선)</h2>
+    
+    <h3>📌 Case 1. Konva 캔버스에서 한글 웹폰트가 누락되고 기본 폰트로 폴백되는 현상</h3>
+    <ul>
+      <li><strong>문제</strong>: UI에서 '주아', '도현' 체를 선택했으나 캔버스 렌더링 시 Malgun Gothic으로 폴백됨.</li>
+      <li><strong>원인</strong>: 브라우저의 Canvas API는 일반 HTML DOM과 달리 아직 화면에 그려지지 않은 웹폰트를 능동적으로 네트워크에서 가져오지 않음.</li>
+      <li><strong>해결책</strong>: 텍스트 레이어가 참조하는 폰트를 <code>document.fonts.load()</code>로 명시적 프리로드하고, 준비 완료 시점에 캔버스 Stage의 <code>fontKey</code> 상태를 변경하여 강제 리렌더링 트리거.</li>
+    </ul>
+
+    <h3>📌 Case 2. 스냅샷 기반 Undo/Redo에서 이전 상태가 오염되는 현상</h3>
+    <ul>
+      <li><strong>문제</strong>: 레이어 순서를 바꾼 뒤 Ctrl+Z를 누르면 이전 상태가 복원되지 않고 현재 상태와 섞여버림.</li>
+      <li><strong>원인</strong>: 기존 <code>handleMoveLayer</code> 함수가 레이어 객체의 <code>zIndex</code> 속성을 인플레이스(In-place mutation)로 수정하여, 히스토리 스택에 저장된 과거 스냅샷이 동일한 메모리 참조를 공유함.</li>
+      <li><strong>해결책</strong>: <code>reorderLayers</code>를 비롯하여 모든 레이어 조작 로직을 스프레드 연산자 및 순수 함수 기반의 불변 업데이트(Immutable Update)로 전면 리팩토링.</li>
+    </ul>
+
+    <h3>📌 Case 3. 다중 슬라이드 일괄 내보내기 시 빈 이미지 저장 현상</h3>
+    <ul>
+      <li><strong>문제</strong>: 5장 세트 템플릿을 ZIP으로 일괄 내보낼 때 2~4번 슬라이드의 이미지가 누락된 채 다운로드됨.</li>
+      <li><strong>원인</strong>: 슬라이드를 스크립트로 빠르게 전환할 때, Konva Image 노드가 비동기로 이미지 엘리먼트를 로드하기 전에 <code>stage.toDataURL()</code>이 호출됨.</li>
+      <li><strong>해결책</strong>: 캔버스 컴포넌트에 <code>isReady()</code> 프로미스를 선언하여 "현재 슬라이드에 포함된 이미지 노드 수 == 로드 완료된 엘리먼트 수" 조건을 충족할 때까지 대기 후 캡처하도록 랑데부(Rendezvous) 동기화 파이프라인 구축.</li>
+    </ul>
+
+    <h3>📌 Case 4. 모바일 터치 환경에서 레이어 드래그 순서 변경 불가</h3>
+    <ul>
+      <li><strong>문제</strong>: 데스크톱에서는 정상 동작하던 레이어 패널 드래그 정렬이 태블릿/모바일 터치 환경에서 동작하지 않음.</li>
+      <li><strong>원인</strong>: HTML5 표준 Drag &amp; Drop API는 터치 스크린 이벤트를 발생시키지 않음.</li>
+      <li><strong>해결책</strong>: <code>⋮⋮</code> 핸들에 <code>Pointer Events API</code>를 적용하고 <code>touch-action: none</code>을 선언하여 마우스와 터치 입력을 단일 파이프라인으로 일원화.</li>
+    </ul>
+
+    <h3>📌 Case 5. 도형 회전 및 리사이징 시 좌표계 오정렬 결함</h3>
+    <ul>
+      <li><strong>문제</strong>: 원, 별 등의 도형을 추가한 후 크기를 조절하거나 회전하면 바운딩 박스와 실제 위치가 어긋남.</li>
+      <li><strong>원인</strong>: Konva의 원/별 노드는 '도형의 중심'을 원점으로 사용하는 반면, 프로젝트 내부 데이터 모델은 '좌상단 바운딩 박스(x, y)'를 기준으로 함.</li>
+      <li><strong>해결책</strong>: 노드 이동 시에는 변위(dx, dy)만 누적하고, 트랜스폼 리사이징 시에는 중심점 기준 좌표를 좌상단 좌표로 변환하는 수학적 정규화 어댑터 구현.</li>
+    </ul>
+
+    <h3>📌 Case 6. 새로고침 시 업로드 이미지 소실 및 localStorage 용량 초과</h3>
+    <ul>
+      <li><strong>문제</strong>: 대용량 사진을 넣고 작업 중 브라우저 새로고침 시 이미지가 깨지고, localStorage 5MB 한계로 인해 <code>QuotaExceededError</code> 발생.</li>
+      <li><strong>원인</strong>: 파일 업로드 시 생성된 <code>blob:</code> URL은 브라우저 세션이 종료되면 파기되며, 이를 data URL로 localStorage에 저장하면 수십 MB 용량을 감당할 수 없음.</li>
+      <li><strong>해결책</strong>: 비동기 IndexedDB 기반의 자동 저장소(<code>deckStore</code>)를 구축하고, 저장 시점에 Blob을 data URL로 비동기 변환하여 저장 및 중복 캐싱 방지.</li>
+    </ul>
+
+    <!-- Section 6: Security -->
+    <h2>6. 보안 &amp; 품질 관리 (Engineering Standards)</h2>
+    <ul>
+      <li><strong>외부 통신 0건 &amp; 엄격한 CSP</strong>: <code>vercel.json</code>을 통해 엄격한 Content Security Policy 헤더 적용. 자체 호스팅 글꼴로 외부 폰트 서버 요청 완전 차단.</li>
+      <li><strong>방어적 Zod 스키마 검증</strong>: 손상되거나 비인가 블렌드 모드가 주입된 템플릿 JSON 로드 시 원자적으로 거부하여 기존 세션 보호.</li>
+      <li><strong>CI/CD 자동화</strong>: GitHub Actions를 통해 커밋마다 Oxlint 정적 분석, TypeScript 엄격 타입 검사, 오픈소스 라이선스 게이트 스크립트, Vitest 단위 테스트, Playwright E2E 스모크 테스트 자동 검증.</li>
+    </ul>
+
+  </div>
+
+  <div class="floating-nav">
+    <button class="quick-jump-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="최상단으로 이동" aria-label="맨 위로">▲</button>
+  </div>
+
+  <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close">&times;</span>
+    <img id="lightbox-img" class="lightbox-content" src="" alt="확대 이미지">
+  </div>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (window.scrollY / docHeight) * 100;
+      document.getElementById('progress-bar').style.width = `${progress}%`;
+    });
+
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    themeToggleBtn.innerText = currentTheme === 'dark' ? '☀' : '🌙';
+
+    themeToggleBtn.addEventListener('click', () => {
+      const activeTheme = document.documentElement.getAttribute('data-theme');
+      const nextTheme = activeTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      localStorage.setItem('theme', nextTheme);
+      themeToggleBtn.innerText = nextTheme === 'dark' ? '☀' : '🌙';
+    });
+
+    (function initAmbientCanvas() {
+      const canvas = document.getElementById('ambient-canvas');
+      const ctx = canvas.getContext('2d');
+      let w, h;
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      const orbs = [
+        { x: w * 0.25, y: h * 0.3, r: 350, vx: 0.2, vy: 0.3, color: 'rgba(99, 102, 241, 0.1)' },
+        { x: w * 0.75, y: h * 0.5, r: 400, vx: -0.25, vy: 0.18, color: 'rgba(139, 92, 246, 0.08)' }
+      ];
+
+      function animate() {
+        ctx.clearRect(0, 0, w, h);
+        orbs.forEach(orb => {
+          orb.x += orb.vx;
+          orb.y += orb.vy;
+          if (orb.x < -orb.r) orb.x = w + orb.r;
+          if (orb.x > w + orb.r) orb.x = -orb.r;
+          if (orb.y < -orb.r) orb.y = h + orb.r;
+          if (orb.y > h + orb.r) orb.y = -orb.r;
+
+          const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
+          grad.addColorStop(0, orb.color);
+          grad.addColorStop(1, 'transparent');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    function openLightbox(src) {
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightbox-img');
+      lightboxImg.src = src;
+      lightbox.classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  </script>
+</body>
+</html>
