@@ -526,45 +526,70 @@
       height: 100%;
       display: block;
     }
+
+    /* Upgraded Slide Strip with Real Thumbnails */
     .slide-strip-container {
       width: 100%;
-      max-width: 520px;
+      max-width: 540px;
       background: rgba(15, 20, 36, 0.85);
       border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 12px 16px;
+      border-radius: 16px;
+      padding: 12px 14px;
       display: flex;
       align-items: center;
       gap: 12px;
       overflow-x: auto;
     }
     .slide-thumb {
-      width: 64px;
-      height: 64px;
-      border-radius: 8px;
+      width: 82px;
+      height: 82px;
+      border-radius: 12px;
       border: 2px solid transparent;
       background: #1e2640;
-      color: #94a3b8;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      position: relative;
+      overflow: hidden;
       cursor: pointer;
       flex-shrink: 0;
-      font-size: 0.75rem;
-      font-weight: 700;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .slide-thumb:hover {
-      border-color: rgba(236, 72, 153, 0.5);
-      color: #fff;
+      border-color: rgba(236, 72, 153, 0.6);
+      transform: translateY(-2px);
     }
     .slide-thumb.active {
       border-color: #ec4899;
-      background: rgba(236, 72, 153, 0.15);
-      color: #ec4899;
-      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(236, 72, 153, 0.55);
+      transform: translateY(-3px);
     }
+    .slide-thumb-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+    .slide-thumb:hover .slide-thumb-preview {
+      transform: scale(1.06);
+    }
+    .slide-thumb-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.2) 65%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 4px 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #fff;
+      pointer-events: none;
+    }
+    .slide-thumb-num {
+      font-size: 0.65rem;
+      font-family: 'Fira Code', monospace;
+      color: #ec4899;
+    }
+
     .page-indicator-pill {
       position: absolute;
       top: 14px;
@@ -1483,7 +1508,8 @@
         <h2 class="section-title">인스타그램 멀티 슬라이드 캐러셀 스튜디오</h2>
         <p class="section-subtitle">
           "카드뉴스의 본질은 단 한 장의 사진이 아니라 5~10장의 스토리텔링입니다."<br>
-          화면비(1:1, 4:5 세로형)와 밈 프리셋을 선택하고 문구를 수정해 보세요. 캔버스 2D로 실시간 렌더링되며 PNG로 바로 다운로드할 수 있습니다.
+          하단 슬라이드 스트립(표지, 문제, 솔루션, 데이터, 결론)을 클릭하면 <strong>각 슬라이드의 실제 사진</strong>이 캔버스에 즉각 렌더링됩니다.
+          화면비(1:1, 4:5 세로형)와 밈 스타일을 자유롭게 전환하거나 내 사진을 직접 올려보세요!
         </p>
       </div>
 
@@ -1518,6 +1544,23 @@
             <textarea id="slideBody" rows="3" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--card-border); background:rgba(0,0,0,0.4); color:#fff; font-size:0.85rem; resize:none;">사용자 이미지는 브라우저 밖으로 1바이트도 유출되지 않습니다.</textarea>
           </div>
 
+          <!-- Slide Photo Custom Uploader -->
+          <div>
+            <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span>슬라이드 사진 변경 (Custom Photo)</span>
+              <span style="font-size:0.75rem; color:var(--accent);">실시간 캔버스 반영</span>
+            </label>
+            <div style="display:flex; gap:8px;">
+              <label class="btn btn-secondary" style="flex:1; padding:8px 12px; font-size:0.82rem; cursor:pointer; text-align:center;">
+                <span>📁 내 사진 업로드</span>
+                <input type="file" id="slidePhotoUpload" accept="image/*" style="display:none;">
+              </label>
+              <button class="btn btn-secondary" id="btnResetPhoto" style="padding:8px 12px; font-size:0.82rem;" title="기본 사진으로 복원">
+                <span>↺ 기본 사진</span>
+              </button>
+            </div>
+          </div>
+
           <div style="background:rgba(236,72,153,0.08); border:1px solid rgba(236,72,153,0.25); border-radius:12px; padding:12px; font-size:0.82rem; color:#fbcfe8;">
             💡 <strong>페이지 번호 자동 각인(Watermark):</strong><br>
             슬라이드가 추가될 때마다 우측 상단에 "01 / 05", "02 / 05" 페이지 번호가 수학적으로 자동 계산되어 일일이 타이핑할 필요가 없습니다.
@@ -1537,31 +1580,50 @@
             <div class="page-indicator-pill" id="pageBadge">01 / 05</div>
           </div>
 
-          <!-- Slide Strip Bar -->
+          <!-- Slide Strip Bar with Real Thumbnails -->
           <div style="width:100%; text-align:center;">
             <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.06em;">
-              캔버스 하단 슬라이드 스트립 (클릭하여 슬라이드 전환)
+              캔버스 하단 슬라이드 스트립 (클릭하여 슬라이드 및 사진 전환)
             </div>
             <div class="slide-strip-container" id="slideStrip" style="margin: 0 auto;">
-              <div class="slide-thumb active" data-slide="1">
-                <span>표지</span>
-                <span style="font-size:0.65rem; color:#ec4899;">01</span>
+              <div class="slide-thumb active" data-slide="1" title="01. 표지 슬라이드">
+                <img src="images/tpl_04_glass_trend.png" alt="표지 썸네일" class="slide-thumb-preview" id="thumbImg1">
+                <div class="slide-thumb-overlay">
+                  <span>표지</span>
+                  <span class="slide-thumb-num">01</span>
+                </div>
               </div>
-              <div class="slide-thumb" data-slide="2">
-                <span>문제</span>
-                <span style="font-size:0.65rem;">02</span>
+
+              <div class="slide-thumb" data-slide="2" title="02. 문제 슬라이드">
+                <img src="images/final2_meme.png" alt="문제 썸네일" class="slide-thumb-preview" id="thumbImg2">
+                <div class="slide-thumb-overlay">
+                  <span>문제</span>
+                  <span class="slide-thumb-num">02</span>
+                </div>
               </div>
-              <div class="slide-thumb" data-slide="3">
-                <span>솔루션</span>
-                <span style="font-size:0.65rem;">03</span>
+
+              <div class="slide-thumb" data-slide="3" title="03. 솔루션 슬라이드">
+                <img src="images/latest_03_carousel_card_loaded.png" alt="솔루션 썸네일" class="slide-thumb-preview" id="thumbImg3">
+                <div class="slide-thumb-overlay">
+                  <span>솔루션</span>
+                  <span class="slide-thumb-num">03</span>
+                </div>
               </div>
-              <div class="slide-thumb" data-slide="4">
-                <span>데이터</span>
-                <span style="font-size:0.65rem;">04</span>
+
+              <div class="slide-thumb" data-slide="4" title="04. 데이터 슬라이드">
+                <img src="images/latest_06_elements_qr_chart.png" alt="데이터 썸네일" class="slide-thumb-preview" id="thumbImg4">
+                <div class="slide-thumb-overlay">
+                  <span>데이터</span>
+                  <span class="slide-thumb-num">04</span>
+                </div>
               </div>
-              <div class="slide-thumb" data-slide="5">
-                <span>결론</span>
-                <span style="font-size:0.65rem;">05</span>
+
+              <div class="slide-thumb" data-slide="5" title="05. 결론 슬라이드">
+                <img src="images/tpl_02_carousel_pastel.png" alt="결론 썸네일" class="slide-thumb-preview" id="thumbImg5">
+                <div class="slide-thumb-overlay">
+                  <span>결론</span>
+                  <span class="slide-thumb-num">05</span>
+                </div>
               </div>
             </div>
           </div>
@@ -2603,7 +2665,7 @@
   </div>
 
   <!-- ==============================================================
-       Unified JavaScript Engine
+       Unified JavaScript Engine with Rich Photo Canvas Renderer
        ============================================================== -->
   <script>
     // 1. Reading Progress Bar
@@ -2781,7 +2843,7 @@
     }
 
     // ==============================================================
-    // CAROUSEL STUDIO ENGINE
+    // CAROUSEL STUDIO ENGINE WITH REAL PHOTOS
     // ==============================================================
     const carouselCanvas = document.getElementById('carouselCanvas');
     const cctx = carouselCanvas ? carouselCanvas.getContext('2d') : null;
@@ -2794,10 +2856,42 @@
     const slideThumbs = document.querySelectorAll('.slide-thumb');
     const presetBtns = document.querySelectorAll('[data-preset]');
     const downloadCurrentSlideBtn = document.getElementById('downloadCurrentSlideBtn');
+    const slidePhotoUpload = document.getElementById('slidePhotoUpload');
+    const btnResetPhoto = document.getElementById('btnResetPhoto');
 
     let currentRatio = '1x1';
     let currentPreset = 'breaking';
     let currentSlideIdx = 1;
+
+    // Default High-Quality Photos for each of the 5 Slides
+    const defaultSlidePhotos = {
+      1: 'images/tpl_04_glass_trend.png',
+      2: 'images/final2_meme.png',
+      3: 'images/latest_03_carousel_card_loaded.png',
+      4: 'images/latest_06_elements_qr_chart.png',
+      5: 'images/tpl_02_carousel_pastel.png'
+    };
+
+    const currentSlidePhotos = { ...defaultSlidePhotos };
+    const imageCache = {};
+
+    function loadSlideImage(idx, src, callback) {
+      const img = new Image();
+      img.onload = () => {
+        imageCache[idx] = img;
+        if (callback) callback();
+      };
+      img.src = src;
+    }
+
+    // Preload all 5 slide photos
+    Object.entries(currentSlidePhotos).forEach(([idx, src]) => {
+      loadSlideImage(idx, src, () => {
+        if (parseInt(idx) === currentSlideIdx) {
+          updateCarousel();
+        }
+      });
+    });
 
     const slideData = {
       1: { title: '01. 인스타그램 카드뉴스의 비밀', body: '사용자 이미지는 브라우저 밖으로 1바이트도 유출되지 않습니다.' },
@@ -2806,6 +2900,38 @@
       4: { title: '04. 슬라이더를 5번 움직여도 1번만 되돌린다', body: '디바운스 기반 불변 리듀서로 이력 스냅샷 폭증을 원천 차단했습니다.' },
       5: { title: '05. 지금 카드툰에서 직접 만들어보세요', body: '로그인 없이 브라우저에서 바로 사용 가능합니다. 인스타 ZIP 일괄 다운로드 지원!' }
     };
+
+    // Helper: Draw image with object-fit: cover and optional rounded corners
+    function drawImageCover(ctx, img, x, y, w, h, radius) {
+      if (!img || !img.complete || img.naturalWidth === 0) return false;
+      ctx.save();
+      if (radius && radius > 0) {
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(x, y, w, h, radius);
+        } else {
+          ctx.rect(x, y, w, h);
+        }
+        ctx.clip();
+      }
+      const imgRatio = img.naturalWidth / img.naturalHeight;
+      const targetRatio = w / h;
+      let sx, sy, sw, sh;
+      if (imgRatio > targetRatio) {
+        sh = img.naturalHeight;
+        sw = sh * targetRatio;
+        sx = (img.naturalWidth - sw) / 2;
+        sy = 0;
+      } else {
+        sw = img.naturalWidth;
+        sh = sw / targetRatio;
+        sx = 0;
+        sy = (img.naturalHeight - sh) / 2;
+      }
+      ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+      ctx.restore();
+      return true;
+    }
 
     function updateCarousel() {
       if (!cctx) return;
@@ -2817,114 +2943,191 @@
       const data = slideData[currentSlideIdx];
       const title = (slideHeadline && slideHeadline.value) || data.title;
       const body = (slideBody && slideBody.value) || data.body;
+      const activeImg = imageCache[currentSlideIdx];
 
       if (pageBadge) pageBadge.textContent = '0' + currentSlideIdx + ' / 05';
 
-      // 1. Background
-      const bgGrad = cctx.createLinearGradient(0, 0, w, h);
+      // ==============================================================
+      // PRESET 1: BREAKING (긴급 속보)
+      // ==============================================================
       if (currentPreset === 'breaking') {
-        bgGrad.addColorStop(0, '#111827');
-        bgGrad.addColorStop(1, '#030712');
-      } else if (currentPreset === 'impact') {
-        bgGrad.addColorStop(0, '#1e1b4b');
-        bgGrad.addColorStop(1, '#4338ca');
-      } else if (currentPreset === 'cinema') {
-        bgGrad.addColorStop(0, '#020617');
-        bgGrad.addColorStop(1, '#0f172a');
-      } else {
-        bgGrad.addColorStop(0, '#311042');
-        bgGrad.addColorStop(1, '#150524');
-      }
-      cctx.fillStyle = bgGrad;
-      cctx.fillRect(0, 0, w, h);
+        // Dark news studio background
+        const bgGrad = cctx.createLinearGradient(0, 0, w, h);
+        bgGrad.addColorStop(0, '#0c0f1d');
+        bgGrad.addColorStop(1, '#03050c');
+        cctx.fillStyle = bgGrad;
+        cctx.fillRect(0, 0, w, h);
 
-      // 2. Preset Style
-      if (currentPreset === 'breaking') {
+        // Center Real Photo Frame
+        const photoX = 40;
+        const photoY = 120;
+        const photoW = w - 80;
+        const photoH = h - 310;
+
+        const hasPhoto = drawImageCover(cctx, activeImg, photoX, photoY, photoW, photoH, 16);
+        if (!hasPhoto) {
+          cctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+          cctx.fillRect(photoX, photoY, photoW, photoH);
+        }
+
+        // Inner photo subtle border & gloss
+        cctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        cctx.lineWidth = 2;
+        cctx.strokeRect(photoX, photoY, photoW, photoH);
+
+        // Red Breaking Banner Top-Left
         cctx.fillStyle = '#dc2626';
-        cctx.fillRect(40, 50, 180, 50);
+        cctx.fillRect(40, 45, 180, 50);
         cctx.fillStyle = '#ffffff';
         cctx.font = 'bold 24px Pretendard, sans-serif';
         cctx.textAlign = 'center';
-        cctx.fillText('긴 급 속 보', 130, 84);
+        cctx.fillText('🚨 긴 급 속 보', 130, 80);
 
-        cctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-        cctx.fillRect(40, 130, w - 80, h - 340);
-        cctx.font = '80px sans-serif';
-        cctx.fillText('🚨📰', w / 2, h / 2 - 20);
-
-        cctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-        cctx.fillRect(40, h - 180, w - 80, 130);
+        // Headline & Subtitle Lower News Bar (Floating Glass Box)
+        cctx.fillStyle = 'rgba(5, 8, 18, 0.92)';
+        cctx.fillRect(40, h - 170, w - 80, 125);
+        cctx.strokeStyle = '#dc2626';
+        cctx.lineWidth = 3;
+        cctx.strokeRect(40, h - 170, w - 80, 125);
 
         cctx.fillStyle = '#f8fafc';
-        cctx.font = 'bold 34px Pretendard, sans-serif';
+        cctx.font = 'bold 32px Pretendard, sans-serif';
         cctx.textAlign = 'left';
-        cctx.fillText(title, 65, h - 120);
+        cctx.fillText(title, 65, h - 115);
 
         cctx.fillStyle = '#94a3b8';
         cctx.font = '20px Pretendard, sans-serif';
-        cctx.fillText(body, 65, h - 75);
+        cctx.fillText(body, 65, h - 72);
 
+      // ==============================================================
+      // PRESET 2: IMPACT MEME (상·하단 밈)
+      // ==============================================================
       } else if (currentPreset === 'impact') {
+        // Full-bleed photo covering the entire canvas!
+        const hasPhoto = drawImageCover(cctx, activeImg, 0, 0, w, h);
+        if (!hasPhoto) {
+          const bgGrad = cctx.createLinearGradient(0, 0, w, h);
+          bgGrad.addColorStop(0, '#1e1b4b');
+          bgGrad.addColorStop(1, '#4338ca');
+          cctx.fillStyle = bgGrad;
+          cctx.fillRect(0, 0, w, h);
+        }
+
+        // Subtle top & bottom shadow gradient for text readability
+        const topGrad = cctx.createLinearGradient(0, 0, 0, 220);
+        topGrad.addColorStop(0, 'rgba(0,0,0,0.75)');
+        topGrad.addColorStop(1, 'transparent');
+        cctx.fillStyle = topGrad;
+        cctx.fillRect(0, 0, w, 220);
+
+        const bottomGrad = cctx.createLinearGradient(0, h - 220, 0, h);
+        bottomGrad.addColorStop(0, 'transparent');
+        bottomGrad.addColorStop(1, 'rgba(0,0,0,0.85)');
+        cctx.fillStyle = bottomGrad;
+        cctx.fillRect(0, h - 220, w, 220);
+
+        // Impact White Text with Massive Black Outline
         cctx.textAlign = 'center';
         cctx.fillStyle = '#ffffff';
         cctx.strokeStyle = '#000000';
-        cctx.lineWidth = 10;
+        cctx.lineWidth = 12;
         cctx.lineJoin = 'miter';
 
-        cctx.font = '900 48px Pretendard, sans-serif';
-        cctx.strokeText(title, w / 2, 140);
-        cctx.fillText(title, w / 2, 140);
+        // Top Headline
+        cctx.font = '900 46px Pretendard, Impact, sans-serif';
+        cctx.strokeText(title, w / 2, 130);
+        cctx.fillText(title, w / 2, 130);
 
-        cctx.font = '100px sans-serif';
-        cctx.fillText('🔥😎', w / 2, h / 2 + 20);
-
-        cctx.font = '800 32px Pretendard, sans-serif';
+        // Bottom Subtitle
+        cctx.font = '800 32px Pretendard, Impact, sans-serif';
         cctx.lineWidth = 8;
-        cctx.strokeText(body, w / 2, h - 100);
-        cctx.fillText(body, w / 2, h - 100);
+        cctx.strokeText(body, w / 2, h - 90);
+        cctx.fillText(body, w / 2, h - 90);
 
+      // ==============================================================
+      // PRESET 3: CINEMA (영화 자막)
+      // ==============================================================
       } else if (currentPreset === 'cinema') {
+        // Cinema Black Letterbox at Top and Bottom
+        const topBarH = 80;
+        const bottomBarH = 150;
+        const screenY = topBarH;
+        const screenH = h - topBarH - bottomBarH;
+
+        // Middle Photo
+        drawImageCover(cctx, activeImg, 0, screenY, w, screenH);
+
+        // Top black bar
         cctx.fillStyle = '#000000';
-        cctx.fillRect(0, 0, w, 100);
-        cctx.fillRect(0, h - 140, w, 140);
+        cctx.fillRect(0, 0, w, topBarH);
 
-        cctx.font = '70px sans-serif';
+        // Bottom black bar
+        cctx.fillRect(0, h - bottomBarH, w, bottomBarH);
+
+        // Cinema Subtitle in Golden Yellow
         cctx.textAlign = 'center';
-        cctx.fillText('🎬 ☕', w / 2, h / 2);
-
         cctx.fillStyle = '#fef08a';
         cctx.font = 'bold 32px Pretendard, serif';
-        cctx.fillText(title, w / 2, h - 80);
+        cctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+        cctx.shadowBlur = 6;
+        cctx.fillText(title, w / 2, h - 90);
 
-        cctx.fillStyle = '#ffffff';
+        cctx.fillStyle = '#e2e8f0';
         cctx.font = '22px Pretendard, serif';
-        cctx.fillText(body, w / 2, h - 40);
+        cctx.shadowBlur = 4;
+        cctx.fillText(body, w / 2, h - 45);
+        cctx.shadowBlur = 0;
 
+      // ==============================================================
+      // PRESET 4: DEV QUOTE (개발자 명언 & 인사이트)
+      // ==============================================================
       } else {
+        const bgGrad = cctx.createLinearGradient(0, 0, w, h);
+        bgGrad.addColorStop(0, '#1b092b');
+        bgGrad.addColorStop(1, '#07020e');
+        cctx.fillStyle = bgGrad;
+        cctx.fillRect(0, 0, w, h);
+
+        // Right side floating graphic with real photo
+        const cardW = 320;
+        const cardH = currentRatio === '1x1' ? 320 : 420;
+        const cardX = w - cardW - 50;
+        const cardY = (h - cardH) / 2;
+
+        cctx.save();
+        cctx.shadowColor = 'rgba(236, 72, 153, 0.35)';
+        cctx.shadowBlur = 30;
+        drawImageCover(cctx, activeImg, cardX, cardY, cardW, cardH, 20);
+        cctx.restore();
+
+        // Left side Dev Insight Typography
         cctx.fillStyle = '#ec4899';
-        cctx.font = 'bold 20px Fira Code, monospace';
+        cctx.font = 'bold 22px Fira Code, monospace';
         cctx.textAlign = 'left';
-        cctx.fillText('// CARDTOON DEV INSIGHT', 60, 90);
+        cctx.fillText('// CARDTOON INSIGHT 0' + currentSlideIdx, 60, 110);
 
         cctx.fillStyle = '#ffffff';
-        cctx.font = 'bold 38px Pretendard, sans-serif';
-        cctx.fillText(title, 60, 180);
+        cctx.font = 'bold 36px Pretendard, sans-serif';
+        cctx.fillText(title, 60, 200, w - cardW - 130);
 
         cctx.strokeStyle = '#8b5cf6';
-        cctx.lineWidth = 3;
+        cctx.lineWidth = 4;
         cctx.beginPath();
-        cctx.moveTo(60, 240); cctx.lineTo(200, 240);
+        cctx.moveTo(60, 245);
+        cctx.lineTo(180, 245);
         cctx.stroke();
 
         cctx.fillStyle = '#cbd5e1';
-        cctx.font = '24px Pretendard, sans-serif';
-        cctx.fillText(body, 60, 310);
+        cctx.font = '22px Pretendard, sans-serif';
+        cctx.fillText(body, 60, 310, w - cardW - 130);
 
-        cctx.font = '60px sans-serif';
-        cctx.fillText('🚀 💻', w - 160, h - 80);
+        cctx.fillStyle = '#64748b';
+        cctx.font = '16px Fira Code, monospace';
+        cctx.fillText('const author = "cardtoon-engine";', 60, h - 80);
       }
     }
 
+    // Ratio Toggle
     if (btnRatio1x1 && btnRatio4x5) {
       btnRatio1x1.addEventListener('click', () => {
         btnRatio1x1.classList.add('active');
@@ -2943,6 +3146,7 @@
       });
     }
 
+    // Preset Buttons
     presetBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         presetBtns.forEach(b => b.classList.remove('active'));
@@ -2952,6 +3156,7 @@
       });
     });
 
+    // Slide Strip Thumbnail Switcher
     slideThumbs.forEach(thumb => {
       thumb.addEventListener('click', () => {
         slideThumbs.forEach(t => t.classList.remove('active'));
@@ -2966,6 +3171,40 @@
     if (slideHeadline) slideHeadline.addEventListener('input', updateCarousel);
     if (slideBody) slideBody.addEventListener('input', updateCarousel);
 
+    // Custom Photo Upload Listener
+    if (slidePhotoUpload) {
+      slidePhotoUpload.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target.result;
+          currentSlidePhotos[currentSlideIdx] = dataUrl;
+          loadSlideImage(currentSlideIdx, dataUrl, () => {
+            // Update thumbnail image preview
+            const thumbImg = document.getElementById('thumbImg' + currentSlideIdx);
+            if (thumbImg) thumbImg.src = dataUrl;
+            updateCarousel();
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Reset to Default Photo
+    if (btnResetPhoto) {
+      btnResetPhoto.addEventListener('click', () => {
+        const defaultSrc = defaultSlidePhotos[currentSlideIdx];
+        currentSlidePhotos[currentSlideIdx] = defaultSrc;
+        loadSlideImage(currentSlideIdx, defaultSrc, () => {
+          const thumbImg = document.getElementById('thumbImg' + currentSlideIdx);
+          if (thumbImg) thumbImg.src = defaultSrc;
+          updateCarousel();
+        });
+      });
+    }
+
+    // Download Current Slide as PNG
     if (downloadCurrentSlideBtn) {
       downloadCurrentSlideBtn.addEventListener('click', () => {
         const link = document.createElement('a');
