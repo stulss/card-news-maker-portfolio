@@ -1,0 +1,2213 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>카드툰 (Cardtoon) | 100% 클라이언트 사이드 인스타 카드뉴스·밈 에디터 포트폴리오</title>
+  <meta name="description" content="서버 0원, 이미지 외부 전송 0 Byte — Canvas 2D + Konva.js 기반 인스타그램 10장 캐러셀, WASM AI 배경 제거, 42종 템플릿 카드뉴스 에디터">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="assets/icon-192.png">
+  <style>
+    /* CSS Reset & Cardtoon Custom Tokens */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    :root {
+      --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      
+      /* Cardtoon Theme Colors */
+      --bg-primary: #0a0c16;
+      --bg-secondary: #101426;
+      --bg-surface: #151a30;
+      --bg-card: rgba(21, 26, 48, 0.78);
+      --bg-card-hover: rgba(30, 38, 70, 0.9);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(236, 72, 153, 0.5);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --accent-indigo: #6366f1;
+      --accent-violet: #8b5cf6;
+      --accent-pink: #ec4899;
+      --accent-rose: #f43f5e;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      
+      --glow-violet: rgba(139, 92, 246, 0.2);
+      --glow-pink: rgba(236, 72, 153, 0.2);
+      --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+      --snap-guide: #ec4899;
+    }
+
+    html.light {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-surface: #f1f5f9;
+      --bg-card: rgba(255, 255, 255, 0.9);
+      --bg-card-hover: rgba(243, 244, 246, 0.98);
+      --border-color: rgba(0, 0, 0, 0.08);
+      --border-hover: rgba(236, 72, 153, 0.5);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --glow-violet: rgba(139, 92, 246, 0.08);
+      --glow-pink: rgba(236, 72, 153, 0.08);
+      --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.65;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+      max-width: 1260px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    h1, h2, h3, h4 {
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #818cf8 0%, #c084fc 40%, #f472b6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .gradient-badge {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15));
+      border: 1px solid rgba(236, 72, 153, 0.3);
+      color: #f472b6;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 1px solid currentColor;
+    }
+    .badge-violet { color: #c084fc; background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.25); }
+    .badge-pink { color: #f472b6; background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.25); }
+    .badge-cyan { color: #22d3ee; background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.25); }
+    .badge-emerald { color: #34d399; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.25); }
+    .badge-amber { color: #fbbf24; background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.25); }
+
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .glass-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    /* Header Nav */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 12, 22, 0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+    }
+    html.light header {
+      background: rgba(248, 250, 252, 0.88);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 16px rgba(236, 72, 153, 0.45);
+    }
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .brand-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: block;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    .nav-links a:hover {
+      color: var(--accent-pink);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid transparent;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(236, 72, 153, 0.4);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 22px rgba(236, 72, 153, 0.55);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--text-muted);
+      transform: translateY(-2px);
+    }
+    .btn-icon {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      padding: 80px 0 60px;
+      overflow: hidden;
+    }
+    .hero-glow-1 {
+      position: absolute;
+      top: -120px;
+      left: 6%;
+      width: 560px;
+      height: 560px;
+      background: radial-gradient(circle, var(--glow-violet) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero-glow-2 {
+      position: absolute;
+      top: 40px;
+      right: 4%;
+      width: 580px;
+      height: 580px;
+      background: radial-gradient(circle, var(--glow-pink) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 48px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .hero-tagline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .hero-title {
+      font-size: 3.3rem;
+      font-weight: 800;
+      line-height: 1.14;
+      letter-spacing: -0.03em;
+    }
+    .hero-desc {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 10px;
+    }
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .metric-val {
+      font-size: 1.75rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--accent-pink);
+      letter-spacing: -0.02em;
+    }
+    .metric-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Live Preview Mockup Box */
+    .preview-box {
+      background: #050713;
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+    }
+    .preview-header {
+      background: rgba(16, 20, 38, 0.95);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .window-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+    .preview-url {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 4px 16px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .preview-body {
+      position: relative;
+      height: 480px;
+      background: #090c1a;
+    }
+    .preview-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .preview-overlay-link {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: rgba(16, 20, 38, 0.92);
+      backdrop-filter: blur(8px);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      color: #f472b6;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(244, 114, 182, 0.3);
+      transition: all 0.2s;
+    }
+    .preview-overlay-link:hover {
+      background: #ec4899;
+      color: #fff;
+    }
+
+    /* Section Header */
+    section {
+      padding: 90px 0;
+      position: relative;
+    }
+    .section-header {
+      text-align: center;
+      max-width: 820px;
+      margin: 0 auto 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .section-title {
+      font-size: 2.3rem;
+      letter-spacing: -0.02em;
+    }
+    .section-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+    }
+
+    /* ==============================================================
+       SPECIAL FEATURE 1: Instagram Multi-Slide Carousel Studio
+       ============================================================== */
+    .carousel-studio {
+      background: #070914;
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 36px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .carousel-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .studio-stage-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .insta-phone-frame {
+      width: 100%;
+      max-width: 440px;
+      aspect-ratio: 1; /* 1:1 default, can toggle 4:5 */
+      background: #0f1424;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+      transition: aspect-ratio 0.3s ease;
+    }
+    .insta-phone-frame.ratio-4x5 {
+      aspect-ratio: 4 / 5;
+    }
+    #carouselCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* Slide Strip */
+    .slide-strip-container {
+      width: 100%;
+      max-width: 520px;
+      background: rgba(15, 20, 36, 0.85);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow-x: auto;
+    }
+    .slide-thumb {
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      background: #1e2640;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      font-size: 0.75rem;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .slide-thumb:hover {
+      border-color: rgba(236, 72, 153, 0.5);
+      color: #fff;
+    }
+    .slide-thumb.active {
+      border-color: #ec4899;
+      background: rgba(236, 72, 153, 0.15);
+      color: #ec4899;
+      transform: translateY(-2px);
+    }
+    .page-indicator-pill {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: #fff;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    /* Ratio & Preset Selector */
+    .pill-group {
+      display: flex;
+      gap: 8px;
+    }
+    .pill-btn {
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill-btn:hover {
+      background: rgba(139, 92, 246, 0.15);
+      color: #fff;
+    }
+    .pill-btn.active {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(236, 72, 153, 0.35);
+    }
+
+    /* ==============================================================
+       SPECIAL FEATURE 2: WASM AI Background Removal Before/After Slider
+       ============================================================== */
+    .compare-container {
+      position: relative;
+      width: 100%;
+      max-width: 680px;
+      aspect-ratio: 16 / 10;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 0 auto;
+      border: 2px solid var(--border-color);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+      user-select: none;
+    }
+    .compare-img-box {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+    }
+    .compare-before {
+      background: linear-gradient(135deg, #1e1b4b, #312e81);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: #fff;
+    }
+    .compare-after {
+      background: radial-gradient(circle at center, rgba(236,72,153,0.15) 0%, #060812 70%),
+                  repeating-conic-gradient(rgba(255,255,255,0.03) 0% 25%, transparent 0% 50%) 50% / 20px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: #fff;
+      width: 50%;
+      overflow: hidden;
+      border-right: 2px solid #ec4899;
+    }
+    .compare-slider-bar {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 4px;
+      background: #ec4899;
+      transform: translateX(-50%);
+      cursor: ew-resize;
+      z-index: 10;
+    }
+    .compare-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #fff;
+      color: #ec4899;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      box-shadow: 0 4px 14px rgba(236, 72, 153, 0.6);
+    }
+    .compare-tag {
+      position: absolute;
+      top: 14px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      letter-spacing: 0.05em;
+    }
+
+    /* ==============================================================
+       SPECIAL FEATURE 3: Magnetic Snap Guides Demo Box
+       ============================================================== */
+    .snap-demo-box {
+      width: 100%;
+      height: 280px;
+      background: #070914;
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .snap-center-line-x {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      border-top: 1px dashed var(--snap-guide);
+      display: none;
+      z-index: 5;
+    }
+    .snap-center-line-y {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      border-left: 1px dashed var(--snap-guide);
+      display: none;
+      z-index: 5;
+    }
+    .draggable-card {
+      width: 120px;
+      height: 70px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      border-radius: 12px;
+      position: absolute;
+      top: 105px;
+      left: calc(50% - 60px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: grab;
+      user-select: none;
+      box-shadow: 0 8px 20px rgba(236, 72, 153, 0.4);
+      z-index: 10;
+    }
+    .draggable-card:active {
+      cursor: grabbing;
+    }
+
+    /* Bento Grid for Engineering Pillars */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 24px;
+    }
+    .col-span-8 { grid-column: span 8; }
+    .col-span-4 { grid-column: span 4; }
+    .col-span-6 { grid-column: span 6; }
+    .col-span-12 { grid-column: span 12; }
+
+    .pillar-card {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .pillar-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+    }
+    .pillar-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent-pink);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .pillar-title {
+      font-size: 1.35rem;
+      margin-bottom: 12px;
+    }
+    .pillar-desc {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .code-preview {
+      background: #040612;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: #c4b5fd;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+    .code-hl-red { color: #f87171; }
+    .code-hl-green { color: #4ade80; }
+    .code-hl-pink { color: #f472b6; }
+    .code-hl-cyan { color: #38bdf8; }
+
+    /* STAR Troubleshooting Section */
+    .trouble-filters {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 8px 18px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: #fff;
+      border-color: transparent;
+    }
+    .trouble-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .trouble-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 28px 32px;
+      transition: all 0.25s ease;
+    }
+    .trouble-card:hover {
+      border-color: rgba(236, 72, 153, 0.4);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.4);
+    }
+    .trouble-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .trouble-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .trouble-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+    }
+    .trouble-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .star-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .star-col {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .star-badge {
+      font-size: 0.7rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+    .badge-s { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .badge-t { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .badge-a { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .badge-r { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+    .star-text {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+    .star-lesson {
+      margin-top: 18px;
+      padding: 14px 18px;
+      border-left: 3px solid var(--accent-pink);
+      background: rgba(236, 72, 153, 0.06);
+      border-radius: 0 10px 10px 0;
+      font-size: 0.86rem;
+      color: #e2e8f0;
+      font-style: italic;
+    }
+
+    /* AI Collaboration Section */
+    .ai-collab-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .ai-card {
+      border-radius: 18px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+    }
+    .ai-card.rejected {
+      border-color: rgba(244, 63, 94, 0.3);
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.05) 0%, var(--bg-card) 100%);
+    }
+    .ai-card.judged {
+      border-color: rgba(168, 85, 247, 0.3);
+      background: linear-gradient(180deg, rgba(168, 85, 247, 0.05) 0%, var(--bg-card) 100%);
+    }
+    .ai-card.delegated {
+      border-color: rgba(16, 185, 129, 0.3);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, var(--bg-card) 100%);
+    }
+
+    /* Gallery Grid */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+    .gallery-item {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background: #02040a;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+    .gallery-item:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-pink);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+    .gallery-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .gallery-item:hover .gallery-img {
+      transform: scale(1.05);
+    }
+    .gallery-caption {
+      padding: 12px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .modal-close {
+      position: absolute;
+      top: 24px;
+      right: 28px;
+      color: #fff;
+      font-size: 2rem;
+      cursor: pointer;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 60px 0 40px;
+      background: #060812;
+      text-align: center;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 24px;
+      list-style: none;
+    }
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover {
+      color: var(--accent-pink);
+    }
+
+    @media (max-width: 1024px) {
+      .hero-grid, .carousel-studio { grid-template-columns: 1fr; }
+      .bento-grid { grid-template-columns: 1fr; }
+      .col-span-8, .col-span-4, .col-span-6, .col-span-12 { grid-column: span 1; }
+      .star-grid { grid-template-columns: 1fr 1fr; }
+      .ai-collab-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .hero-title { font-size: 2.3rem; }
+      .hero-metrics { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .star-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header>
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <div class="brand-logo">🎨</div>
+        <div>
+          <span class="brand-title">카드툰 (Cardtoon)</span>
+          <span class="brand-sub">Instagram Carousel & Graphic Editor</span>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#carousel-section">인스타 캐러셀 스튜디오</a></li>
+        <li><a href="#wasm-ai">WASM AI 누끼</a></li>
+        <li><a href="#snap-feature">자석 스냅 가이드</a></li>
+        <li><a href="#architecture">아키텍처 설계</a></li>
+        <li><a href="#troubleshooting">트러블슈팅(STAR)</a></li>
+        <li><a href="#gallery">증거 갤러리</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="themeToggle" class="btn-icon" title="다크/라이트 모드 전환">🌓</button>
+        <a href="https://card-news-maker-beige.vercel.app/" target="_blank" class="btn btn-primary">
+          <span>에디터 실행</span>
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero" id="overview">
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="hero-tagline">
+          <span class="badge gradient-badge">INSTAGRAM CAROUSEL ENGINE</span>
+          <span class="badge badge-emerald">서버 0원 프라이버시</span>
+          <span class="badge badge-violet">WASM AI 누끼</span>
+        </div>
+        <h1 class="hero-title">
+          인스타그램 10장을<br>
+          한 번에 완성하는<br>
+          <span class="gradient-text">무서버 캔버스 에디터</span>
+        </h1>
+        <p class="hero-desc">
+          서버로 단 1바이트의 사용자 이미지도 전송하지 않는 <strong>100% 클라이언트 사이드 그래픽 엔진</strong>입니다.
+          Konva.js 기반 1:1 무결점 렌더링, 인스타그램 1:1 및 4:5 최적화, 1~10장 캐러셀 스트립과 일괄 ZIP 다운로드,
+          브라우저 내 WASM AI 배경 제거까지—카드뉴스 제작의 모든 허들을 프론트엔드 기술로 정면 돌파했습니다.
+        </p>
+
+        <!-- Metrics -->
+        <div class="hero-metrics">
+          <div class="metric-card">
+            <span class="metric-val">0 Byte</span>
+            <span class="metric-label">사용자 이미지 서버 유출 (완전한 로컬 보호)</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val">10 장</span>
+            <span class="metric-label">인스타그램 캐러셀 원클릭 ZIP 패키징</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val">42 종</span>
+            <span class="metric-label">내장 템플릿 갤러리 (카드뉴스·밈·공지)</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:8px; flex-wrap:wrap;">
+          <a href="#carousel-section" class="btn btn-primary">
+            <span>🎠 인스타 10장 캐러셀 스튜디오 조작하기</span>
+          </a>
+          <a href="#wasm-ai" class="btn btn-secondary">
+            <span>✨ AI 누끼 Before/After 비교</span>
+          </a>
+          <a href="docs/과제_제출_보고서.pdf" target="_blank" class="btn btn-secondary">
+            <span>📑 제출 보고서(32p) PDF</span>
+          </a>
+          <a href="https://github.com/stulss/card-news-maker-portfolio" target="_blank" class="btn btn-secondary">
+            <span>💻 GitHub 코드</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Live Preview Device Mockup -->
+      <div class="preview-box">
+        <div class="preview-header">
+          <div class="window-dots">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+          </div>
+          <div class="preview-url">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm-1 14.5v-9l6 4.5z"/></svg>
+            https://card-news-maker-beige.vercel.app
+          </div>
+          <span style="font-size:0.75rem; color:#ec4899; font-weight:700;">LIVE APP</span>
+        </div>
+        <div class="preview-body">
+          <iframe src="https://card-news-maker-beige.vercel.app/" class="preview-iframe" title="카드툰 라이브 웹 에디터"></iframe>
+          <a href="https://card-news-maker-beige.vercel.app/" target="_blank" class="preview-overlay-link">
+            <span>전체 화면으로 에디터 열기</span>
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       SPECIAL FEATURE 1: Instagram Multi-Slide Carousel Studio
+       ============================================================== -->
+  <section id="carousel-section" style="background: rgba(0,0,0,0.18); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+      <div class="section-header">
+        <span class="badge badge-pink">CARDTOON SIGNATURE 01</span>
+        <h2 class="section-title">인스타그램 멀티 슬라이드 캐러셀 스튜디오</h2>
+        <p class="section-subtitle">
+          "카드뉴스의 본질은 단 한 장의 사진이 아니라 5~10장의 스토리텔링입니다."<br>
+          아래 슬라이드 스트립을 클릭해 장별로 넘겨보고, 인스타그램 화면비(1:1, 4:5 세로형)와 밈 스타일을 직접 스위칭해 보세요.
+        </p>
+      </div>
+
+      <div class="carousel-studio">
+        <!-- Controls Column -->
+        <div class="carousel-controls">
+          <div>
+            <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:8px;">인스타그램 화면비 (Aspect Ratio)</label>
+            <div class="pill-group">
+              <button class="pill-btn active" id="btnRatio1x1">1 : 1 정사각형</button>
+              <button class="pill-btn" id="btnRatio4x5">4 : 5 인스타 피드 세로형</button>
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:8px;">카드툰 시그니처 밈 프리셋</label>
+            <div class="pill-group" style="flex-wrap:wrap;">
+              <button class="pill-btn active" data-preset="breaking">🚨 긴급 속보</button>
+              <button class="pill-btn" data-preset="impact">🔥 상·하단 밈</button>
+              <button class="pill-btn" data-preset="cinema">🎬 영화 자막</button>
+              <button class="pill-btn" data-preset="devquote">💻 개발자 명언</button>
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:6px;">현재 슬라이드 헤드라인</label>
+            <input type="text" id="slideHeadline" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--border-color); background:rgba(0,0,0,0.3); color:#fff; font-size:0.9rem;" value="01. 인스타그램 카드뉴스의 비밀">
+          </div>
+
+          <div>
+            <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:6px;">본문 / 서브 문구</label>
+            <textarea id="slideBody" rows="3" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--border-color); background:rgba(0,0,0,0.3); color:#fff; font-size:0.85rem; resize:none;">사용자 이미지는 브라우저 밖으로 1바이트도 유출되지 않습니다.</textarea>
+          </div>
+
+          <div style="background:rgba(236,72,153,0.08); border:1px solid rgba(236,72,153,0.25); border-radius:12px; padding:12px; font-size:0.8rem; color:#fbcfe8;">
+            💡 <strong>페이지 번호 자동 각인(Watermark):</strong><br>
+            슬라이드가 추가될 때마다 우측 상단에 "01 / 05", "02 / 05" 페이지 번호가 수학적으로 자동 렌더링되어 한 장씩 일일이 수정할 필요가 없습니다.
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-primary" id="downloadCurrentSlideBtn" style="flex:1;">
+              <span>💾 현재 슬라이드 PNG 저장</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Canvas & Strip Column -->
+        <div class="studio-stage-wrap">
+          <div class="insta-phone-frame" id="phoneFrame">
+            <canvas id="carouselCanvas" width="800" height="800"></canvas>
+            <div class="page-indicator-pill" id="pageBadge">01 / 05</div>
+          </div>
+
+          <!-- Slide Strip (The iconic Cardtoon Carousel bar) -->
+          <div style="width:100%; text-align:center;">
+            <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.06em;">
+              캔버스 하단 슬라이드 스트립 (클릭하여 전환)
+            </div>
+            <div class="slide-strip-container" id="slideStrip">
+              <div class="slide-thumb active" data-slide="1">
+                <span>표지</span>
+                <span style="font-size:0.65rem; color:#ec4899;">01</span>
+              </div>
+              <div class="slide-thumb" data-slide="2">
+                <span>문제</span>
+                <span style="font-size:0.65rem;">02</span>
+              </div>
+              <div class="slide-thumb" data-slide="3">
+                <span>솔루션</span>
+                <span style="font-size:0.65rem;">03</span>
+              </div>
+              <div class="slide-thumb" data-slide="4">
+                <span>성과</span>
+                <span style="font-size:0.65rem;">04</span>
+              </div>
+              <div class="slide-thumb" data-slide="5">
+                <span>CTA</span>
+                <span style="font-size:0.65rem;">05</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       SPECIAL FEATURE 2: WASM AI Background Removal Before & After
+       ============================================================== -->
+  <section id="wasm-ai">
+    <div class="container">
+      <div class="section-header">
+        <span class="badge badge-violet">CARDTOON SIGNATURE 02</span>
+        <h2 class="section-title">WASM 기반 브라우저 내 AI 누끼(배경 제거)</h2>
+        <p class="section-subtitle">
+          "서버 비용 0원, 사용자 사진 유출 0% — WebAssembly와 ONNX Runtime Web을 통해 브라우저 로컬에서 AI 배경을 분리합니다."<br>
+          가운데 분홍색 조절 바를 마우스나 손가락으로 좌우로 드래그하여 전/후 품질 차이를 직접 체감해 보세요.
+        </p>
+      </div>
+
+      <div class="compare-container" id="compareBox">
+        <!-- Before layer (Original Photo) -->
+        <div class="compare-img-box compare-before">
+          <div style="font-size:4rem;">📷</div>
+          <div style="font-size:1.4rem; font-weight:800; margin-top:10px;">복잡한 배경이 있는 원본 사진</div>
+          <div style="font-size:0.85rem; color:#cbd5e1; margin-top:6px;">기존 방식: 무거운 유료 서버 API로 전송하거나 포토샵 수작업</div>
+          <div class="compare-tag" style="right:14px; color:#f87171;">BEFORE (원본)</div>
+        </div>
+
+        <!-- After layer (Transparent Cutout by WASM AI) -->
+        <div class="compare-img-box compare-after" id="compareAfter">
+          <div style="font-size:4.5rem; filter:drop-shadow(0 10px 20px rgba(0,0,0,0.5));">✨ 🧙‍♂️ ✨</div>
+          <div style="font-size:1.3rem; font-weight:800; margin-top:10px; color:#f472b6;">WASM AI 완전 로컬 누끼 분리</div>
+          <div style="font-size:0.8rem; color:#e2e8f0; margin-top:6px; text-align:center;">투명 배경(PNG) 보존 · 0 Byte 서버 전송</div>
+          <div class="compare-tag" style="left:14px; color:#4ade80;">AFTER (브라우저 AI 제거)</div>
+        </div>
+
+        <!-- Splitter Handle -->
+        <div class="compare-slider-bar" id="compareBar">
+          <div class="compare-handle">⇄</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==============================================================
+       SPECIAL FEATURE 3: Magnetic Snap Guides Visualizer
+       ============================================================== -->
+  <section id="snap-feature" style="background: rgba(0,0,0,0.14);">
+    <div class="container">
+      <div class="section-header">
+        <span class="badge badge-cyan">CARDTOON SIGNATURE 03</span>
+        <h2 class="section-title">자석 정렬 스냅 가이드 (Magnetic Snap)</h2>
+        <p class="section-subtitle">
+          "디자이너가 아니어도 반듯한 레이아웃을 만듭니다."<br>
+          아래의 보라색 카드를 마우스로 드래그해 보세요. 캔버스 정중앙에 가까워지면 분홍색 점선 가이드가 나타나며 자석처럼 '착' 달라붙습니다.
+        </p>
+      </div>
+
+      <div class="glass-card" style="max-width:760px; margin:0 auto; text-align:center;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.85rem; font-weight:700; color:var(--text-muted);">스냅 가이드 인터랙션 샌드박스</span>
+          <span id="snapStatusBadge" class="badge badge-violet">중심에서 벗어남</span>
+        </div>
+
+        <div class="snap-demo-box" id="snapBox">
+          <div class="snap-center-line-x" id="lineX"></div>
+          <div class="snap-center-line-y" id="lineY"></div>
+          <div class="draggable-card" id="dragCard">
+            <span>DRAG ME! 🎯</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Engineering Pillars (Bento Grid) -->
+  <section id="architecture">
+    <div class="container">
+      <div class="section-header">
+        <span class="badge badge-violet">Engineering Decisions</span>
+        <h2 class="section-title">타협 없는 4대 아키텍처 설계</h2>
+        <p class="section-subtitle">
+          "Canva의 무거운 기능 중 카드뉴스 제작 흐름에 꼭 필요한 본질만 골라 프론트엔드로 구현했습니다."<br>
+          서버 비용 0원과 100% 프라이버시를 지키면서 상용 그래픽 툴 수준의 성능을 구현한 기술들입니다.
+        </p>
+      </div>
+
+      <div class="bento-grid">
+        <!-- Pillar 1 -->
+        <div class="glass-card pillar-card col-span-8">
+          <div>
+            <div class="pillar-icon-box" style="background:rgba(236, 72, 153, 0.15); color:#f472b6;">🛡️</div>
+            <div class="pillar-tag">PILLAR 01 · COMPLETE CLIENT-SIDE PRIVACY</div>
+            <h3 class="pillar-title">서버 0원 & 사용자 이미지 유출 0% (IndexedDB 아키텍처)</h3>
+            <p class="pillar-desc">
+              사용자가 업로드한 고용량 사진과 스티커는 외부 서버로 1바이트도 전송되지 않습니다.
+              `blob:` URL의 세션 종료 시 휘발성 한계와 `localStorage`의 엄격한 용량 상한(~5MB)을 극복하기 위해,
+              <strong>IndexedDB 기반 무제한 덱 저장소(deckStore)</strong>를 구축했습니다.
+              JSON 스키마 방어 검증기를 거쳐 손상된 데이터가 주입되어도 안전하게 기본값으로 복구합니다.
+            </p>
+          </div>
+          <div class="code-preview">
+<span class="code-hl-pink">// IndexedDB 자동 저장 및 Data URL 변환 캐싱</span>
+export async function saveDeckToIndexedDB(deck: Deck): Promise&lt;void&gt; {
+  const serialized = await serializeDeckWithImages(deck);
+  const db = await openDatabase();
+  await db.put('decks', serialized, 'current_deck');
+}
+          </div>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="glass-card pillar-card col-span-4">
+          <div>
+            <div class="pillar-icon-box" style="background:rgba(139, 92, 246, 0.15); color:#c084fc;">📐</div>
+            <div class="pillar-tag">PILLAR 02 · ZERO RENDERING DRIFT</div>
+            <h3 class="pillar-title">미리보기 = 내보내기 1:1 무결점 파이프라인</h3>
+            <p class="pillar-desc">
+              HTML2Canvas 등 서드파티 캡처 라이브러리는 CSS 그림자나 회전 변형 시 화면과 결과물이 달라지는 고질병이 있습니다.
+              카드툰은 <strong>미리보기 화면과 고해상도 내보내기 파이프라인이 단 하나의 Konva Stage 객체를 공유</strong>하여
+              1픽셀, 0.1도 회전각도 어긋나지 않는 100% 무결점 출력을 보증합니다.
+            </p>
+          </div>
+          <div class="code-preview">
+const stage = stageRef.current;
+await waitForImagesAndFontsLoaded(stage);
+const dataUrl = stage.toDataURL({ pixelRatio: exportScale });
+          </div>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="glass-card pillar-card col-span-6">
+          <div>
+            <div class="pillar-icon-box" style="background:rgba(56, 189, 248, 0.15); color:#38bdf8;">⏮️</div>
+            <div class="pillar-tag">PILLAR 03 · IMMUTABLE HISTORY ENGINE</div>
+            <h3 class="pillar-title">불변 상태 기반 지능형 되돌리기 (Undo/Redo)</h3>
+            <p class="pillar-desc">
+              과거 레이어의 `zIndex`를 제자리(in-place) 수정하던 레거시 구조를 완전한 불변(Immutable) 상태 트리로 리팩토링했습니다.
+              사용자가 투명도나 크기 슬라이더를 5번 연속 조작할 때는 <strong>디바운스 병합(Coalescing)</strong>을 통해 1단계로 묶고,
+              레이어 추가/삭제나 방향키 이동은 각각 독립 단계로 보존하는 지능형 이력 스택을 완성했습니다.
+            </p>
+          </div>
+          <div class="code-preview">
+<span class="code-hl-cyan">// 슬라이더 연속 변경은 타임스탬프 기반 순수 상태 병합</span>
+if (action.type === 'UPDATE' &amp;&amp; last?.type === action.type &amp;&amp; Date.now() - last.time &lt; 400) {
+  return { ...state, present: action.payload }; <span class="code-hl-green">// 병합</span>
+}
+          </div>
+        </div>
+
+        <!-- Pillar 4 -->
+        <div class="glass-card pillar-card col-span-6">
+          <div>
+            <div class="pillar-icon-box" style="background:rgba(16, 185, 129, 0.15); color:#34d399;">🤖</div>
+            <div class="pillar-tag">PILLAR 04 · IN-BROWSER WASM AI</div>
+            <h3 class="pillar-title">브라우저 내 WASM AI 배경 제거 & CSP 방어</h3>
+            <p class="pillar-desc">
+              서버 API를 호출하지 않고 클라이언트 WebAssembly(ONNX Runtime Web) 기반으로 이미지 누끼를 실시간 분리합니다.
+              운영 환경에서 발생했던 엄격한 Content Security Policy(CSP)의 `blob:` 스크립트 모듈 차단 결함을
+              `worker-src blob:` 및 `script-src` 보안 헤더 세밀 조율로 해결하여 상용화 보안과 AI 기능을 양립시켰습니다.
+            </p>
+          </div>
+          <div class="code-preview">
+<span class="code-hl-green">// vercel.json 보안 헤더와 blob: 워커 공존 설계</span>
+"Content-Security-Policy": "script-src 'self' 'unsafe-eval' blob:; worker-src 'self' blob:;"
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAR Deep-Dive Troubleshooting -->
+  <section id="troubleshooting" style="background: rgba(0,0,0,0.12);">
+    <div class="container">
+      <div class="section-header">
+        <span class="badge badge-pink">STAR Case Studies</span>
+        <h2 class="section-title">실전 문제 해결: 트러블슈팅 8선</h2>
+        <p class="section-subtitle">
+          "진짜 결함은 라이브 환경에서 가장 비싼 비용으로 나타납니다."<br>
+          캔버스 렌더링, 불변 상태, 보안 헤더, 다중 슬라이드 일괄 내보내기 등에서 마주친 핵심 문제 해결 과정입니다.
+        </p>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="trouble-filters">
+        <button class="filter-btn active" data-filter="all">전체 보기 (8)</button>
+        <button class="filter-btn" data-filter="canvas">캔버스 & 렌더링 (3)</button>
+        <button class="filter-btn" data-filter="state">상태 & 이력 관리 (2)</button>
+        <button class="filter-btn" data-filter="security">보안 & 스토리지 (3)</button>
+      </div>
+
+      <div class="trouble-list" id="troubleList">
+
+        <!-- Case 1 -->
+        <div class="trouble-card" data-category="state">
+          <div class="trouble-card-header">
+            <div class="trouble-title-wrap">
+              <div class="trouble-number">01</div>
+              <div>
+                <h3 class="trouble-title">되돌리기를 넣었더니 레이어 순서 변경이 과거 이력 스냅샷까지 훼손한 사건</h3>
+                <span class="badge badge-violet" style="margin-top:4px;">불변성 붕괴 방어</span>
+              </div>
+            </div>
+            <span class="badge badge-pink">상태 관리</span>
+          </div>
+
+          <div class="star-grid">
+            <div class="star-col">
+              <span class="star-badge badge-s">S · SITUATION</span>
+              <p class="star-text">
+                레이어 순서를 ▲▼ 버튼으로 변경한 뒤 Ctrl+Z(실행 취소)를 눌렀을 때, 과거 스냅샷의 zIndex가 이미 바뀌어 있어 이전 상태로 복구되지 않는 잠재적 데이터 오염 현상 발생.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-t">T · TASK</span>
+              <p class="star-text">
+                과거 스냅샷과 현재 작업 상태가 동일한 메모리 객체 레퍼런스를 공유하는 문제를 완전히 차단하고 엄격한 불변 트리 확립.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-a">A · ACTION</span>
+              <p class="star-text">
+                기존의 `layer.zIndex = newZ` 제자리(in-place) 수정 코드를 전면 폐기하고, `reorderLayers` 함수가 항상 새 배열과 새 레이어 복사본을 반환하도록 리팩토링.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-r">R · RESULT</span>
+              <p class="star-text">
+                레이어 이동, 그룹 묶기, 정렬 등 모든 상태 변경이 불변 스냅샷으로 격리되어 100회 이상의 연속 Undo/Redo 스트레스 테스트에서 오작동 0건 달성.
+              </p>
+            </div>
+          </div>
+
+          <div class="star-lesson">
+            💡 <strong>Insight:</strong> 스냅샷 기반의 이력 시스템을 도입할 때는 객체 내부를 제자리에서 수정하는 코드를 전수 조사하여 완전한 불변 복제로 전환해야 한다.
+          </div>
+        </div>
+
+        <!-- Case 2 -->
+        <div class="trouble-card" data-category="canvas">
+          <div class="trouble-card-header">
+            <div class="trouble-title-wrap">
+              <div class="trouble-number">02</div>
+              <div>
+                <h3 class="trouble-title">새 웹폰트를 골라도 캔버스 글자가 바뀌지 않던 비동기 폰트 로딩 결함</h3>
+                <span class="badge badge-violet" style="margin-top:4px;">캔버스 라이프사이클</span>
+              </div>
+            </div>
+            <span class="badge badge-cyan">렌더링 파이프라인</span>
+          </div>
+
+          <div class="star-grid">
+            <div class="star-col">
+              <span class="star-badge badge-s">S · SITUATION</span>
+              <p class="star-text">
+                글꼴 드롭다운에서 한글 웹폰트(예: "주아", "도현")를 선택해도 캔버스 글자가 시스템 기본 폰트(맑은 고딕)로 조용히 폴백되는 현상.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-t">T · TASK</span>
+              <p class="star-text">
+                웹폰트 다운로드가 완료되는 즉시 캔버스 노드를 강제 재렌더링하여 선택한 글꼴이 누락 없이 100% 반영되도록 보장.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-a">A · ACTION</span>
+              <p class="star-text">
+                캔버스(HTML5 Canvas)는 DOM과 달리 아직 쓰이지 않은 웹폰트를 스스로 페칭하지 않는 특성 확인. `document.fonts.load(16px FontName)`로 브라우저에 폰트를 명시적으로 페칭한 후 캔버스를 재호출하는 `fontKey` 동기화 훅 구현.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-r">R · RESULT</span>
+              <p class="star-text">
+                12종 자체 호스팅 한글 폰트 전 구간에서 폰트 미적용 0건. 고해상도 내보내기 시에도 폰트 깨짐 현상 원천 차단.
+              </p>
+            </div>
+          </div>
+
+          <div class="star-lesson">
+            💡 <strong>Insight:</strong> 캔버스에 그리는 폰트는 단순 "CSS 선언"이 아니라 "네트워크 로드 완료(document.fonts.ready)" 시점을 반드시 감지해야 한다.
+          </div>
+        </div>
+
+        <!-- Case 3 -->
+        <div class="trouble-card" data-category="security">
+          <div class="trouble-card-header">
+            <div class="trouble-title-wrap">
+              <div class="trouble-number">03</div>
+              <div>
+                <h3 class="trouble-title">운영 환경 CSP(Content Security Policy)가 WASM AI 배경 제거를 차단한 이슈</h3>
+                <span class="badge badge-pink" style="margin-top:4px;">보안 아키텍처</span>
+              </div>
+            </div>
+            <span class="badge badge-emerald">WASM & CSP</span>
+          </div>
+
+          <div class="star-grid">
+            <div class="star-col">
+              <span class="star-badge badge-s">S · SITUATION</span>
+              <p class="star-text">
+                로컬 개발 서버에서는 완벽히 작동하던 AI 배경 제거가 Vercel 운영 빌드에서 `Failed to fetch dynamically imported module: blob:...` 에러를 뿜으며 조용히 실패.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-t">T · TASK</span>
+              <p class="star-text">
+                웹 취약점 방어를 위한 엄격한 CSP 헤더를 유지하면서도 Transformers.js / ONNX Runtime이 생성하는 blob 워커를 안전하게 실행.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-a">A · ACTION</span>
+              <p class="star-text">
+                WASM 로더가 `URL.createObjectURL`을 통해 동적 blob 스크립트를 로드하는 구조 분석. `vercel.json`의 보안 헤더에서 `script-src 'self' 'unsafe-eval' blob:` 및 `worker-src 'self' blob:`을 정밀 허용.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-r">R · RESULT</span>
+              <p class="star-text">
+                운영 환경에서도 브라우저 내 AI 누끼 따기 100% 정상 작동. 상용화 보안 헤더(X-Frame-Options, X-Content-Type-Options 등)와 기능성 양립 달성.
+              </p>
+            </div>
+          </div>
+
+          <div class="star-lesson">
+            💡 <strong>Insight:</strong> 최신 클라이언트 사이드 AI/WASM 라이브러리는 내부적으로 동적 blob 워커를 적극 활용하므로 운영 보안 헤더(CSP)와의 정밀한 조율이 필수적이다.
+          </div>
+        </div>
+
+        <!-- Case 4 -->
+        <div class="trouble-card" data-category="canvas">
+          <div class="trouble-card-header">
+            <div class="trouble-title-wrap">
+              <div class="trouble-number">04</div>
+              <div>
+                <h3 class="trouble-title">다중 슬라이드 캐러셀(10장) 일괄 내보내기 시 비동기 이미지 누락 방지</h3>
+                <span class="badge badge-violet" style="margin-top:4px;">비동기 렌더링 락</span>
+              </div>
+            </div>
+            <span class="badge badge-amber">대량 내보내기</span>
+          </div>
+
+          <div class="star-grid">
+            <div class="star-col">
+              <span class="star-badge badge-s">S · SITUATION</span>
+              <p class="star-text">
+                10장의 카드뉴스를 ZIP 파일로 한 번에 내보낼 때, 슬라이드가 고속으로 전환되면서 특정 장에서 이미지가 미처 로드되지 않아 빈 캔버스가 캡처되는 결함.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-t">T · TASK</span>
+              <p class="star-text">
+                각 슬라이드의 모든 이미지 노드가 GPU에 바인딩되고 폰트 로딩이 완료될 때까지 정확히 대기하는 비동기 동기화 락(Lock) 설계.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-a">A · ACTION</span>
+              <p class="star-text">
+                `CanvasStage`에 `isReady()` 프로미스 게이트웨이를 노출. 슬라이드 변경 후 화면 내 이미지 엘리먼트의 `complete` 상태와 폰트 로드를 전수 확인한 뒤에만 `toDataURL`을 호출하고 진행률 프로그레스바로 사용자 피드백 제공.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-r">R · RESULT</span>
+              <p class="star-text">
+                10장 연속 고해상도 ZIP 내보내기 시 이미지 누락률 0%. 인스타그램 10장 세트 원클릭 패키징 안정성 확보.
+              </p>
+            </div>
+          </div>
+
+          <div class="star-lesson">
+            💡 <strong>Insight:</strong> 캔버스 일괄 내보내기는 '루프 속도'보다 '렌더링 완료 상태 확인(State Readiness)'이 품질을 결정한다.
+          </div>
+        </div>
+
+        <!-- Case 5 -->
+        <div class="trouble-card" data-category="canvas">
+          <div class="trouble-card-header">
+            <div class="trouble-title-wrap">
+              <div class="trouble-number">05</div>
+              <div>
+                <h3 class="trouble-title">모바일 터치 환경에서 레이어 드래그 앤 드롭 정렬 미동작 해결</h3>
+                <span class="badge badge-violet" style="margin-top:4px;">터치 인터랙션</span>
+              </div>
+            </div>
+            <span class="badge badge-cyan">크로스 디바이스</span>
+          </div>
+
+          <div class="star-grid">
+            <div class="star-col">
+              <span class="star-badge badge-s">S · SITUATION</span>
+              <p class="star-text">
+                데스크탑에서는 마우스로 잘 되던 레이어 순서 변경(⋮⋮ 드래그)이 모바일 스마트폰 화면에서는 터치 시 스크롤만 발생하고 전혀 동작하지 않음.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-t">T · TASK</span>
+              <p class="star-text">
+                마우스와 터치스크린 입력 모두에서 100% 동일하게 부드럽게 작동하는 통합 포인터 드래그 핸들러 구현.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-a">A · ACTION</span>
+              <p class="star-text">
+                HTML5 Drag & Drop API가 모바일 터치 이벤트를 지원하지 않는 점을 파악하고, 최신 Pointer Events (`setPointerCapture` + `document.elementFromPoint`) 파이프라인으로 전면 개편. CSS에 `touch-action: none` 부여.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-r">R · RESULT</span>
+              <p class="star-text">
+                아이폰 Safari, 안드로이드 Chrome 등 모바일 환경에서도 손가락 터치 드래그로 레이어 순서 변경 완벽 지원.
+              </p>
+            </div>
+          </div>
+
+          <div class="star-lesson">
+            💡 <strong>Insight:</strong> 모바일 웹 그래픽 에디터에서는 HTML5 DnD 대신 Pointer Events를 기본 표준으로 채택해야 한다.
+          </div>
+        </div>
+
+        <!-- Case 6 -->
+        <div class="trouble-card" data-category="security">
+          <div class="trouble-card-header">
+            <div class="trouble-title-wrap">
+              <div class="trouble-number">06</div>
+              <div>
+                <h3 class="trouble-title">새로고침 시 업로드했던 이미지가 소실되는 브라우저 메모리 한계 극복</h3>
+                <span class="badge badge-pink" style="margin-top:4px;">데이터 지속성</span>
+              </div>
+            </div>
+            <span class="badge badge-emerald">IndexedDB 스토리지</span>
+          </div>
+
+          <div class="star-grid">
+            <div class="star-col">
+              <span class="star-badge badge-s">S · SITUATION</span>
+              <p class="star-text">
+                사용자가 사진을 올려 카드뉴스를 만들던 중 실수로 새로고침을 누르면 업로드한 이미지가 `blob:` 세션 만료로 전부 엑박(깨짐)으로 유실됨.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-t">T · TASK</span>
+              <p class="star-text">
+                서버를 쓰지 않으면서도 수십 MB 용량의 이미지 데이터가 브라우저를 닫거나 새로고침해도 영구 보존되도록 구현.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-a">A · ACTION</span>
+              <p class="star-text">
+                5MB 용량 한계가 있는 localStorage 대신 IndexedDB를 도입하고, 덱 자동 저장 시점에 blob 데이터를 직렬화된 base64 Data URL로 안전하게 변환하여 캐싱.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-r">R · RESULT</span>
+              <p class="star-text">
+                새로고침 및 브라우저 재실행 시 작업 중이던 이미지와 레이어가 0.5초 만에 100% 자동 복구. 작업 유실 불안 해소.
+              </p>
+            </div>
+          </div>
+
+          <div class="star-lesson">
+            💡 <strong>Insight:</strong> 클라이언트 그래픽 앱에서 데이터 영속성은 사용자의 신뢰와 직결된다. 대용량 바이너리는 IndexedDB가 정답이다.
+          </div>
+        </div>
+
+        <!-- Case 7 -->
+        <div class="trouble-card" data-category="state">
+          <div class="trouble-card-header">
+            <div class="trouble-title-wrap">
+              <div class="trouble-number">07</div>
+              <div>
+                <h3 class="trouble-title">React 18/19 StrictMode 이중 호출로 인한 이력 병합 왜곡 해결</h3>
+                <span class="badge badge-violet" style="margin-top:4px;">React 동시성</span>
+              </div>
+            </div>
+            <span class="badge badge-pink">순수 함수 상태</span>
+          </div>
+
+          <div class="star-grid">
+            <div class="star-col">
+              <span class="star-badge badge-s">S · SITUATION</span>
+              <p class="star-text">
+                개발 모드에서 방향키로 레이어를 이동했을 때 작업 이력에 이동 단계가 기록되지 않고 바로 앞의 추가 단계에 흡수되어 버리는 기현상.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-t">T · TASK</span>
+              <p class="star-text">
+                React의 StrictMode 이중 렌더링 환경에서도 예측 가능하고 순수한 이력 병합 로직 구축.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-a">A · ACTION</span>
+              <p class="star-text">
+                병합 판단용 값을 컴포넌트 외부의 `ref`에서 수정하던 것이 원인. 상태 갱신 함수 내부에서 외부 ref를 변경하면 이중 호출 시 두 번째 호출이 오염된 값을 보게 됨. 마지막 변경 키와 시각을 상태 내부(`last`)로 이동해 순수 리듀서로 전환.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-r">R · RESULT</span>
+              <p class="star-text">
+                개발 모드와 프로덕션 빌드 간 이력 동작 100% 일치. 슬라이더 조작은 1단계로 합쳐지고 방향키 이동은 정확히 개별 단계로 기록.
+              </p>
+            </div>
+          </div>
+
+          <div class="star-lesson">
+            💡 <strong>Insight:</strong> React 상태 갱신 함수 안에서는 절대 외부의 ref나 전역 변수를 조작하면 안 된다. 상태 갱신은 순수해야 한다.
+          </div>
+        </div>
+
+        <!-- Case 8 -->
+        <div class="trouble-card" data-category="canvas">
+          <div class="trouble-card-header">
+            <div class="trouble-title-wrap">
+              <div class="trouble-number">08</div>
+              <div>
+                <h3 class="trouble-title">Konva의 그라디언트와 단색 fill 충돌 및 8자리 hex 파싱 결함</h3>
+                <span class="badge badge-violet" style="margin-top:4px;">렌더러 결함 극복</span>
+              </div>
+            </div>
+            <span class="badge badge-cyan">컬러 파서 방어</span>
+          </div>
+
+          <div class="star-grid">
+            <div class="star-col">
+              <span class="star-badge badge-s">S · SITUATION</span>
+              <p class="star-text">
+                도형에 선형 그라디언트를 지정했는데 단색으로만 보이거나, 텍스트 그림자에 투명 hex(`#00000066`)를 넣었을 때 색상이 무시되는 버그.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-t">T · TASK</span>
+              <p class="star-text">
+                Konva의 내부 fill 우선순위 규칙과 색상 파서의 제한을 극복하는 공용 렌더링 어댑터 구축.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-a">A · ACTION</span>
+              <p class="star-text">
+                그라디언트 지정 시에는 `fill` 속성을 완전히 제거하고 전달하도록 분기 처리. 그림자 색상은 8자리 hex 대신 표준 `rgba(r,g,b,a)` 문자열로 변환하여 주입.
+              </p>
+            </div>
+            <div class="star-col">
+              <span class="star-badge badge-r">R · RESULT</span>
+              <p class="star-text">
+                배경, 사각형, 둥근 모서리 등 모든 도형에서 감성적인 다채색 그라디언트와 미세 그림자 연출 정상화.
+              </p>
+            </div>
+          </div>
+
+          <div class="star-lesson">
+            💡 <strong>Insight:</strong> 외부 라이브러리의 렌더링 우선순위와 속성 파싱 규칙을 맹신하지 말고 방어적 정규화 계층을 두어야 한다.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Evidence & Screenshot Gallery -->
+  <section id="gallery">
+    <div class="container">
+      <div class="section-header">
+        <span class="badge badge-violet">Visual Artifacts</span>
+        <h2 class="section-title">검증 증거 및 스크린샷 갤러리</h2>
+        <p class="section-subtitle">
+          개발요청서(PRD) 52개 장과 실제 구현 일치 여부를 증명하는 스크린샷들입니다.
+        </p>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-item" onclick="openModal('assets/evidence/card1_editor_text_style.png')">
+          <img src="assets/evidence/card1_editor_text_style.png" class="gallery-img" alt="텍스트 스타일 에디터">
+          <div class="gallery-caption">텍스트 스타일 & 폰트 편집</div>
+        </div>
+        <div class="gallery-item" onclick="openModal('assets/evidence/card2_ratio_4x5.png')">
+          <img src="assets/evidence/card2_ratio_4x5.png" class="gallery-img" alt="인스타그램 4:5 비율">
+          <div class="gallery-caption">인스타그램 4:5 비율 최적화</div>
+        </div>
+        <div class="gallery-item" onclick="openModal('assets/evidence/card2_ratio_9x16.png')">
+          <img src="assets/evidence/card2_ratio_9x16.png" class="gallery-img" alt="스토리 9:16 비율">
+          <div class="gallery-caption">릴스/스토리 9:16 비율 지원</div>
+        </div>
+        <div class="gallery-item" onclick="openModal('assets/evidence/card3_stroke_before_after.png')">
+          <img src="assets/evidence/card3_stroke_before_after.png" class="gallery-img" alt="외곽선 효과 전후">
+          <div class="gallery-caption">텍스트 외곽선 & 그림자 효과</div>
+        </div>
+        <div class="gallery-item" onclick="openModal('assets/evidence/card4_template_crud.png')">
+          <img src="assets/evidence/card4_template_crud.png" class="gallery-img" alt="템플릿 CRUD">
+          <div class="gallery-caption">내 템플릿 저장/불러오기(CRUD)</div>
+        </div>
+        <div class="gallery-item" onclick="openModal('assets/evidence/card5_json_defense.png')">
+          <img src="assets/evidence/card5_json_defense.png" class="gallery-img" alt="JSON 방어 검증">
+          <div class="gallery-caption">비정상 템플릿 JSON 방어 검증</div>
+        </div>
+        <div class="gallery-item" onclick="openModal('assets/evidence/final2_meme.png')">
+          <img src="assets/evidence/final2_meme.png" class="gallery-img" alt="밈 자막 프리셋">
+          <div class="gallery-caption">밈 자막 프리셋 & 스티커</div>
+        </div>
+        <div class="gallery-item" onclick="openModal('assets/evidence/ev03_persist_after_reload.png')">
+          <img src="assets/evidence/ev03_persist_after_reload.png" class="gallery-img" alt="새로고침 후 복원">
+          <div class="gallery-caption">IndexedDB 새로고침 데이터 복원</div>
+        </div>
+      </div>
+
+      <!-- Document Download Area -->
+      <div class="glass-card" style="margin-top:40px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px;">
+        <div>
+          <h3 style="font-size:1.2rem;">제출용 덱 보고서 원본 및 기획서</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">
+            32장 제출용 프레젠테이션 보고서 및 52개 장 개발요청서(PRD) 원본을 직접 열람할 수 있습니다.
+          </p>
+        </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <a href="docs/과제_제출_보고서.pdf" target="_blank" class="btn btn-primary">
+            <span>📄 과제 제출 보고서 (PDF)</span>
+          </a>
+          <a href="docs/PRD.md" target="_blank" class="btn btn-secondary">
+            <span>📐 개발요청서(PRD) MD</span>
+          </a>
+          <a href="docs/트러블슈팅.md" target="_blank" class="btn btn-secondary">
+            <span>📝 25대 트러블슈팅 전문</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <ul class="footer-links">
+        <li><a href="https://card-news-maker-beige.vercel.app/" target="_blank">카드툰 라이브 에디터</a></li>
+        <li><a href="https://github.com/stulss/card-news-maker-portfolio" target="_blank">GitHub 저장소</a></li>
+        <li><a href="docs/README_ORIGINAL.md" target="_blank">프로젝트 상세 문서</a></li>
+        <li><a href="docs/AI_3줄.md" target="_blank">AI 협업 회고록</a></li>
+      </ul>
+      <p style="font-size:0.85rem; color:var(--text-muted);">
+        카드툰 (card-news-maker) · Frontend Engineering Case Study Portfolio<br>
+        Built with React 19, TypeScript, Konva.js & IndexedDB.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Modal -->
+  <div id="imageModal" class="modal" onclick="closeModal()">
+    <span class="modal-close">&times;</span>
+    <img id="modalImg" class="modal-content" src="" alt="확대 이미지">
+  </div>
+
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('light');
+      themeToggle.textContent = document.documentElement.classList.contains('light') ? '🌙' : '🌓';
+    });
+
+    // Modal
+    function openModal(src) {
+      document.getElementById('modalImg').src = src;
+      document.getElementById('imageModal').classList.add('active');
+    }
+    function closeModal() {
+      document.getElementById('imageModal').classList.remove('active');
+    }
+
+    // ==============================================================
+    // CAROUSEL STUDIO LOGIC
+    // ==============================================================
+    const carouselCanvas = document.getElementById('carouselCanvas');
+    const cctx = carouselCanvas.getContext('2d');
+    const phoneFrame = document.getElementById('phoneFrame');
+    const pageBadge = document.getElementById('pageBadge');
+    const btnRatio1x1 = document.getElementById('btnRatio1x1');
+    const btnRatio4x5 = document.getElementById('btnRatio4x5');
+    const slideHeadline = document.getElementById('slideHeadline');
+    const slideBody = document.getElementById('slideBody');
+    const slideThumbs = document.querySelectorAll('.slide-thumb');
+    const presetBtns = document.querySelectorAll('[data-preset]');
+    const downloadCurrentSlideBtn = document.getElementById('downloadCurrentSlideBtn');
+
+    let currentRatio = '1x1'; // 1x1 or 4x5
+    let currentPreset = 'breaking';
+    let currentSlideIdx = 1;
+
+    // Slide Content Mock
+    const slideData = {
+      1: { title: '01. 인스타그램 카드뉴스의 비밀', body: '사용자 이미지는 브라우저 밖으로 1바이트도 유출되지 않습니다.' },
+      2: { title: '02. 서버 0원으로 운영되는 비결', body: 'IndexedDB 덱 저장소와 WebAssembly AI를 활용한 클라이언트 사이드 연산.' },
+      3: { title: '03. 1:1 일치 Konva 렌더링 파이프라인', body: '화면에서 보던 폰트, 외곽선, 그림자가 내보내기 결과물과 100% 동일하게 일치합니다.' },
+      4: { title: '04. 슬라이더를 5번 움직여도 1번만 되돌린다', body: '타임스탬프 기반 불변 리듀서로 이력 스냅샷 오염을 원천 차단했습니다.' },
+      5: { title: '05. 지금 카드툰에서 직접 만들어보세요', body: '로그인 없이 브라우저에서 바로 사용 가능합니다. 인스타 ZIP 일괄 다운로드 지원!' }
+    };
+
+    function updateCarousel() {
+      const w = 800;
+      const h = currentRatio === '1x1' ? 800 : 1000;
+      carouselCanvas.width = w;
+      carouselCanvas.height = h;
+
+      const data = slideData[currentSlideIdx];
+      const title = slideHeadline.value || data.title;
+      const body = slideBody.value || data.body;
+
+      pageBadge.textContent = `0${currentSlideIdx} / 05`;
+
+      // 1. Background
+      const bgGrad = cctx.createLinearGradient(0, 0, w, h);
+      if (currentPreset === 'breaking') {
+        bgGrad.addColorStop(0, '#111827');
+        bgGrad.addColorStop(1, '#030712');
+      } else if (currentPreset === 'impact') {
+        bgGrad.addColorStop(0, '#1e1b4b');
+        bgGrad.addColorStop(1, '#4338ca');
+      } else if (currentPreset === 'cinema') {
+        bgGrad.addColorStop(0, '#020617');
+        bgGrad.addColorStop(1, '#0f172a');
+      } else {
+        bgGrad.addColorStop(0, '#311042');
+        bgGrad.addColorStop(1, '#150524');
+      }
+      cctx.fillStyle = bgGrad;
+      cctx.fillRect(0, 0, w, h);
+
+      // 2. Preset Design
+      if (currentPreset === 'breaking') {
+        // Red Breaking Banner
+        cctx.fillStyle = '#dc2626';
+        cctx.fillRect(40, 50, 180, 50);
+        cctx.fillStyle = '#ffffff';
+        cctx.font = 'bold 24px Pretendard, sans-serif';
+        cctx.textAlign = 'center';
+        cctx.fillText('긴 급 속 보', 130, 84);
+
+        // Center Graphic Box
+        cctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        cctx.fillRect(40, 130, w - 80, h - 340);
+        cctx.font = '80px sans-serif';
+        cctx.fillText('🚨📰', w / 2, h / 2 - 20);
+
+        // Headline & Subtitle Lower News Bar
+        cctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+        cctx.fillRect(40, h - 180, w - 80, 130);
+
+        cctx.fillStyle = '#f8fafc';
+        cctx.font = 'bold 34px Pretendard, sans-serif';
+        cctx.textAlign = 'left';
+        cctx.fillText(title, 65, h - 120);
+
+        cctx.fillStyle = '#94a3b8';
+        cctx.font = '20px Pretendard, sans-serif';
+        cctx.fillText(body, 65, h - 75);
+
+      } else if (currentPreset === 'impact') {
+        // Classic Meme (Impact White + Black Stroke)
+        cctx.textAlign = 'center';
+        cctx.fillStyle = '#ffffff';
+        cctx.strokeStyle = '#000000';
+        cctx.lineWidth = 10;
+        cctx.lineJoin = 'miter';
+
+        cctx.font = '900 48px Pretendard, sans-serif';
+        cctx.strokeText(title, w / 2, 140);
+        cctx.fillText(title, w / 2, 140);
+
+        cctx.font = '100px sans-serif';
+        cctx.fillText('🔥😎', w / 2, h / 2 + 20);
+
+        cctx.font = '800 32px Pretendard, sans-serif';
+        cctx.lineWidth = 8;
+        cctx.strokeText(body, w / 2, h - 100);
+        cctx.fillText(body, w / 2, h - 100);
+
+      } else if (currentPreset === 'cinema') {
+        // Cinema Subtitles (Black Letterbox + Yellow Subtitle)
+        cctx.fillStyle = '#000000';
+        cctx.fillRect(0, 0, w, 100);
+        cctx.fillRect(0, h - 140, w, 140);
+
+        cctx.font = '70px sans-serif';
+        cctx.textAlign = 'center';
+        cctx.fillText('🎬 ☕', w / 2, h / 2);
+
+        cctx.fillStyle = '#fef08a'; // Yellow Subtitle
+        cctx.font = 'bold 32px Pretendard, serif';
+        cctx.fillText(title, w / 2, h - 80);
+
+        cctx.fillStyle = '#ffffff';
+        cctx.font = '22px Pretendard, serif';
+        cctx.fillText(body, w / 2, h - 40);
+
+      } else {
+        // Dev Quote Card
+        cctx.fillStyle = '#ec4899';
+        cctx.font = 'bold 20px Fira Code, monospace';
+        cctx.textAlign = 'left';
+        cctx.fillText('// CARDTOON DEV INSIGHT', 60, 90);
+
+        cctx.fillStyle = '#ffffff';
+        cctx.font = 'bold 38px Pretendard, sans-serif';
+        cctx.fillText(title, 60, 180);
+
+        cctx.strokeStyle = '#8b5cf6';
+        cctx.lineWidth = 3;
+        cctx.beginPath();
+        cctx.moveTo(60, 240); cctx.lineTo(200, 240);
+        cctx.stroke();
+
+        cctx.fillStyle = '#cbd5e1';
+        cctx.font = '24px Pretendard, sans-serif';
+        cctx.fillText(body, 60, 310);
+
+        cctx.font = '60px sans-serif';
+        cctx.fillText('🚀 💻', w - 160, h - 80);
+      }
+    }
+
+    // Ratio Toggle
+    btnRatio1x1.addEventListener('click', () => {
+      btnRatio1x1.classList.add('active');
+      btnRatio4x5.classList.remove('active');
+      currentRatio = '1x1';
+      phoneFrame.classList.remove('ratio-4x5');
+      updateCarousel();
+    });
+
+    btnRatio4x5.addEventListener('click', () => {
+      btnRatio4x5.classList.add('active');
+      btnRatio1x1.classList.remove('active');
+      currentRatio = '4x5';
+      phoneFrame.classList.add('ratio-4x5');
+      updateCarousel();
+    });
+
+    // Preset Switch
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        presetBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentPreset = btn.dataset.preset;
+        updateCarousel();
+      });
+    });
+
+    // Slide Strip Click
+    slideThumbs.forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        slideThumbs.forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+        currentSlideIdx = parseInt(thumb.dataset.slide);
+        slideHeadline.value = slideData[currentSlideIdx].title;
+        slideBody.value = slideData[currentSlideIdx].body;
+        updateCarousel();
+      });
+    });
+
+    slideHeadline.addEventListener('input', updateCarousel);
+    slideBody.addEventListener('input', updateCarousel);
+
+    downloadCurrentSlideBtn.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = `cardtoon_slide_0${currentSlideIdx}.png`;
+      link.href = carouselCanvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // ==============================================================
+    // WASM AI COMPARISON SLIDER LOGIC
+    // ==============================================================
+    const compareBox = document.getElementById('compareBox');
+    const compareAfter = document.getElementById('compareAfter');
+    const compareBar = document.getElementById('compareBar');
+    let isDraggingCompare = false;
+
+    function moveCompare(x) {
+      const rect = compareBox.getBoundingClientRect();
+      let pos = (x - rect.left) / rect.width;
+      if (pos < 0) pos = 0;
+      if (pos > 1) pos = 1;
+      const pct = pos * 100;
+      compareAfter.style.width = pct + '%';
+      compareBar.style.left = pct + '%';
+    }
+
+    compareBox.addEventListener('mousedown', (e) => {
+      isDraggingCompare = true;
+      moveCompare(e.clientX);
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!isDraggingCompare) return;
+      moveCompare(e.clientX);
+    });
+    window.addEventListener('mouseup', () => {
+      isDraggingCompare = false;
+    });
+
+    // Touch support for compare slider
+    compareBox.addEventListener('touchstart', (e) => {
+      isDraggingCompare = true;
+      moveCompare(e.touches[0].clientX);
+    });
+    window.addEventListener('touchmove', (e) => {
+      if (!isDraggingCompare) return;
+      moveCompare(e.touches[0].clientX);
+    });
+    window.addEventListener('touchend', () => {
+      isDraggingCompare = false;
+    });
+
+    // ==============================================================
+    // MAGNETIC SNAP GUIDE DEMO LOGIC
+    // ==============================================================
+    const snapBox = document.getElementById('snapBox');
+    const dragCard = document.getElementById('dragCard');
+    const lineX = document.getElementById('lineX');
+    const lineY = document.getElementById('lineY');
+    const snapStatusBadge = document.getElementById('snapStatusBadge');
+
+    let isDraggingSnap = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    dragCard.addEventListener('mousedown', (e) => {
+      isDraggingSnap = true;
+      const rect = dragCard.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDraggingSnap) return;
+      const boxRect = snapBox.getBoundingClientRect();
+      let x = e.clientX - boxRect.left - offsetX;
+      let y = e.clientY - boxRect.top - offsetY;
+
+      // Center snap check (threshold 14px)
+      const centerX = (boxRect.width - 120) / 2;
+      const centerY = (boxRect.height - 70) / 2;
+
+      let snappedX = false;
+      let snappedY = false;
+
+      if (Math.abs(x - centerX) < 14) {
+        x = centerX;
+        snappedX = true;
+        lineY.style.display = 'block';
+      } else {
+        lineY.style.display = 'none';
+      }
+
+      if (Math.abs(y - centerY) < 14) {
+        y = centerY;
+        snappedY = true;
+        lineX.style.display = 'block';
+      } else {
+        lineX.style.display = 'none';
+      }
+
+      dragCard.style.left = x + 'px';
+      dragCard.style.top = y + 'px';
+
+      if (snappedX && snappedY) {
+        snapStatusBadge.textContent = '🎯 완벽한 정중앙 스냅!';
+        snapStatusBadge.className = 'badge badge-pink';
+      } else if (snappedX || snappedY) {
+        snapStatusBadge.textContent = '✨ 자석 정렬 가이드 활성';
+        snapStatusBadge.className = 'badge badge-violet';
+      } else {
+        snapStatusBadge.textContent = '중심에서 벗어남';
+        snapStatusBadge.className = 'badge badge-cyan';
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDraggingSnap = false;
+      lineX.style.display = 'none';
+      lineY.style.display = 'none';
+    });
+
+    // Troubleshooting Filtering
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const troubleCards = document.querySelectorAll('.trouble-card');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+
+        troubleCards.forEach(card => {
+          if (filter === 'all' || card.dataset.category === filter) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Initial Draw
+    updateCarousel();
+  </script>
+</body>
+</html>

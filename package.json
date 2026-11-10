@@ -1,0 +1,21 @@
+{
+  "name": "card-news-maker-portfolio",
+  "version": "1.0.0",
+  "description": "카드툰(card-news-maker) 프론트엔드 엔지니어링 포트폴리오 및 딥다이브 케이스 스터디",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve ."
+  },
+  "keywords": [
+    "portfolio",
+    "case-study",
+    "frontend-engineer",
+    "canvas-2d",
+    "konva",
+    "react-19",
+    "indexeddb",
+    "wasm"
+  ],
+  "author": "홍주형",
+  "license": "MIT"
+}
